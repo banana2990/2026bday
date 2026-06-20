@@ -14,21 +14,21 @@
 <div class="records-container">
   <h2>📋 내 활동 서머리</h2>
 
-  <h3>&lt;퀴즈 참여 결과&gt;</h3>
+  <h3> &lt;퀴즈 참여 결과&gt; </h3>
   <table class="record-table">
     <thead>
     <tr>
-      <th>횟수</th>
+      <th>참여회차</th>
       <th>맞춘개수</th>
       <th>점수</th>
       <th>상품</th>
-      <th>발송여부</th>
+      <th>상품발송</th>
     </tr>
     </thead>
     <tbody>
     {% for res in quiz_results %}
-    <tr>
-      <td><strong>{{ res.round }}회차</strong></td>
+    <11tr>
+      <td><strong>{{ res.round }}</strong></td>
       <td>{{ res.correct_count }}개</td>
       <td style="color:#4a90e2; font-weight:bold;">{{ res.score }}점</td>
 
@@ -36,12 +36,12 @@
 
       <td>
         {% if res.is_sent == 'Y' %}
-        <span class="status-y">Y</span>
+        <span class="status-y">완료</span>
         {% else %}
-        <span class="status-n">N</span>
+        <span class="status-n">예정</span>
         {% endif %}
       </td>
-    </tr>
+    </11tr>
     {% else %}
     <tr>
       <td colspan="5" style="color: #999; padding: 25px 0;">아직 제출된 퀴즈 참여 이력이 없습니다.</td>

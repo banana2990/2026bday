@@ -262,22 +262,27 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
-
-# [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트
+# [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트 (수정본)
 @app.route("/quiz/start")
 def quiz_start_page():
     if "user_id" not in session:
         flash("로그인이 필요한 서비스입니다.", "login_error")
         return redirect(url_for("home"))
 
-    attempts_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
+    user = db.session.get(User, session["user_id"])
 
+    # 1) 이미 상품이 발송된 유저인지 체크
+    if user and user.sent_at is not None:
+        flash("이미 상품이 발송되어 더 이상 퀴즈 참여가 불가능합니다.", "login_error")
+        return redirect(url_for("home"))
+
+    # 2) 3회 참여 제한 체크
+    attempts_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
     if attempts_count >= 3:
-        flash("이미 참여 기회를 모두 사용하셨습니다. <br/> (최대 3회)", "login_error")
+        flash("이미 3회의 참여 기회를 모두 사용하셨습니다. (최대 3회)", "login_error")
         return redirect(url_for("home"))
 
     return render_template("quiz.html")
-
 
 # [Quiz] 20문제 일괄 제출 및 채점 처리
 @app.route("/submit-quiz", methods=["POST"])
