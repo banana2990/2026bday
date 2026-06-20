@@ -161,3 +161,24 @@ button, .form-input {
     from { transform: translateY(-20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* 전역 버튼 스타일 축소 */
+button {
+    padding: 6px 12px;       /* 상하 6px, 좌우 12px로 줄임 */
+    font-size: 0.85rem;      /* 글자 크기를 살짝 줄임 */
+    border-radius: 4px;      /* 모서리를 조금 더 부드럽게 */
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
+
+/* 특정 용도별 버튼 커스텀 (필요 시) */
+.btn-memo-action {
+    padding: 4px 8px;        /* 메모용 버튼은 더 작게 */
+    font-size: 0.75rem;
+}
+
+.btn-action {
+    padding: 5px 10px;       /* 관리자용 버튼 등도 조금 더 작게 */
+    font-size: 0.8rem;
+}
