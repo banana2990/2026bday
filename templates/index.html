@@ -19,6 +19,7 @@
     <title>2026 김예진 탄신일 퀴즈</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
 
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.8.1/kakao.min.js"></script>
 </head>
@@ -27,37 +28,56 @@
 <div class="card">
 
     {% if not user %}
-    <div class="hero-emoji">🎲</div>
-    <h1 class="hero-title"><span>김씨</span> 퀴즈</h1>
-    <p class="hero-sub">당신은 얼마나 알고 있나요?</p>
+    <div id="auth-start" class="auth-section active">
+        <div class="hero-emoji">🎲</div>
+        <h1 class="hero-title"><span>김씨</span> 퀴즈</h1>
+        <p class="hero-sub">당신은 얼마나 알고 있나요?</p>
 
-    <form action="/login" method="POST" style="margin-bottom: 15px;">
-        <input type="text" name="username" placeholder="아이디" required style="width:100%; padding:8px; margin-bottom:5px; box-sizing: border-box;">
-        <input type="password" name="password" placeholder="비밀번호" required style="width:100%; padding:8px; margin-bottom:10px; box-sizing: border-box;">
-        <button type="submit" style="width:100%; padding:8px; background-color:#4CAF50; color:white; border:none; cursor:pointer; font-weight:bold;">로그인</button>
-    </form>
+        <button class="btn-kakao" onclick="kakaoLogin()">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 2C6.029 2 2 5.358 2 9.5c0 2.677 1.695 5.033 4.271 6.393L5.2 19.3c-.1.37.33.668.652.441L10.2 16.94c.263.02.53.06.8.06 4.971 0 9-3.358 9-7.5S15.971 2 11 2Z" fill="#3C1E1E"/>
+            </svg>
+            카카오로 로그인하기
+        </button>
 
-    <button class="btn-kakao" onclick="kakaoLogin()" style="margin-bottom: 20px; width:100%;">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11 2C6.029 2 2 5.358 2 9.5c0 2.677 1.695 5.033 4.271 6.393L5.2 19.3c-.1.37.33.668.652.441L10.2 16.94c.263.02.53.06.8.06 4.971 0 9-3.358 9-7.5S15.971 2 11 2Z" fill="#3C1E1E"/>
-        </svg>
-        카카오로 시작하기
-    </button>
+        <button class="btn-local-toggle" onclick="showSection('auth-login')">일반 로그인하기</button>
+    </div>
 
-    <div class="divider"></div>
-
-    <div style="margin-top: 15px; text-align: left;">
-        <p style="font-size: 0.9em; color: #666; margin-bottom: 8px; text-align: center;">아직 계정이 없으신가요?</p>
-        <form action="/register" method="POST">
-            <input type="text" name="username" placeholder="새 아이디" required style="width:100%; padding:6px; margin-bottom:5px; box-sizing: border-box;">
-            <input type="password" name="password" placeholder="새 비밀번호" required style="width:100%; padding:6px; margin-bottom:5px; box-sizing: border-box;">
-            <input type="text" name="nickname" placeholder="닉네임(이름)" required style="width:100%; padding:6px; margin-bottom:10px; box-sizing: border-box;">
-            <button type="submit" style="width:100%; padding:6px; background-color:#4a90e2; color:white; border:none; cursor:pointer;">일반 회원가입</button>
+    <div id="auth-login" class="auth-section">
+        <h2 class="section-title">일반 로그인</h2>
+        <form action="/login" method="POST">
+            <input type="text" name="username" placeholder="아이디" required class="form-input">
+            <input type="password" name="password" placeholder="비밀번호" required class="form-input">
+            <button type="submit" class="btn-submit btn-login">로그인</button>
         </form>
+
+        <div class="auth-links">
+            <a href="#" onclick="showSection('auth-register')">새로 회원가입</a>
+            <span class="lnb-divider">|</span>
+            <a href="#" onclick="alert('준비 중인 기능입니다.')">비밀번호 찾기</a>
+            <span class="lnb-divider">|</span>
+            <a href="#" onclick="showSection('auth-start')" class="link-back">뒤로가기</a>
+        </div>
+    </div>
+
+    <div id="auth-register" class="auth-section">
+        <h2 class="section-title">회원가입</h2>
+        <form action="/register" method="POST">
+            <input type="text" name="username" placeholder="새 아이디" required class="form-input">
+            <input type="password" name="password" placeholder="새 비밀번호" required class="form-input">
+            <input type="text" name="nickname" placeholder="닉네임(이름)" required class="form-input">
+            <button type="submit" class="btn-submit btn-register">회원가입</button>
+        </form>
+
+        <div class="auth-links">
+            <a href="#" onclick="showSection('auth-login')">이미 계정이 있으신가요? 로그인</a>
+            <span class="lnb-divider">|</span>
+            <a href="#" onclick="showSection('auth-start')" class="link-back">뒤로가기</a>
+        </div>
     </div>
 
     {% if request.args.get('login_error') %}
-    <div class="error-banner" style="color: red; margin-top: 10px; font-size: 0.9em;">{{ request.args.get('login_error') }}</div>
+    <div class="error-banner">{{ request.args.get('login_error') }}</div>
     {% endif %}
 
     {% else %}
@@ -111,14 +131,10 @@
 
 <p class="footer">© 김씨 퀴즈 2026</p>
 
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 <script>
-    Kakao.init("{{ kakao_js_key }}");
-
-    function kakaoLogin() {
-        Kakao.Auth.authorize({
-            redirectUri: "{{ kakao_redirect_uri }}",
-        });
-    }
+    // 카카오 SDK 초기화 주입
+    initKakao("{{ kakao_js_key }}", "{{ kakao_redirect_uri }}");
 </script>
 
 </body>
