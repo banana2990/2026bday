@@ -467,7 +467,7 @@ def memo_page():
 
     memo_count = UserMemo.query.filter_by(user_id=session["user_id"]).count()
     if memo_count >= 5:
-        flash("이미 최대 메모 개수(5개)를 채우셨습니다. \n'내 기록 확인'에서 기존 메모를 관리해 주세요!", "login_error")
+        flash("이미 최대 메모 개수(5개)를 채우셨습니다.\n'내 기록 확인'에서 기존 메모를 관리해 주세요!", "login_error")
         return redirect(url_for("home"))
 
     colors = ['postit-yellow', 'postit-pink', 'postit-green', 'postit-blue']

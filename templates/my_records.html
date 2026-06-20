@@ -12,17 +12,17 @@
 <body>
 
 <div class="records-container">
-  <h2>📋 내 활동 서머리</h2>
+  <h2>📋 내 기록 확인</h2>
 
   <h3> &lt;퀴즈 참여 결과&gt; </h3>
   <table class="record-table">
     <thead>
     <tr>
-      <th>참여회차</th>
-      <th>맞춘개수</th>
+      <th>회차</th>
+      <th>정답</th>
       <th>점수</th>
       <th>상품</th>
-      <th>상품발송</th>
+      <th>발송</th>
     </tr>
     </thead>
     <tbody>
@@ -30,7 +30,7 @@
     <tr>
       <td><strong>{{ res.round }}</strong></td>
       <td>{{ res.correct_count }}개</td>
-      <td style="color:#4a90e2; font-weight:bold;">{{ res.score }}점</td>
+      <td style="color:#4a90e2; font-weight:bold;">{{ res.score }}</td>
 
       <td class="prize-cell" data-score="{{ res.score }}" style="font-size:0.8rem; text-align:left;">계산중...</td>
 

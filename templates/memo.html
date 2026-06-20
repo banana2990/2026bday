@@ -78,12 +78,12 @@
   <form action="/submit-memo" method="POST">
 
     <div class="postit {{ selected_color }}">
-      <textarea name="content" class="postit-textarea" placeholder="여기에 내용을 입력하세요... (화면을 터치하면 작성할 수 있어요)" required maxlength="500"></textarea>
+      <textarea name="content" class="postit-textarea" placeholder="내용을 입력하세요... " required maxlength="500"></textarea>
     </div>
 
     <input type="hidden" name="bg_color" value="{{ selected_color }}">
 
-    <button type="submit" class="btn-submit-memo">📌 메모 남기기</button>
+    <button type="submit" class="btn-submit-memo">📌 남기기</button>
   </form>
 
   <a href="/" class="link-back" style="margin-top: 20px; display: inline-block;">홈으로 돌아가기</a>
