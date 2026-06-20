@@ -44,7 +44,7 @@ class User(db.Model):
     sent_at       = db.Column(db.DateTime, nullable=True)
 
     quiz_attempts = db.relationship("QuizAttempt", backref="user", lazy=True)
-    messages      = db.relationship("Message",      backref="user", lazy=True)
+    memos      = db.relationship("UserMemo",    backref="user", lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -464,6 +464,7 @@ def send_product(target_user_id):
         "message": "발송 처리가 완료되었습니다.",
         "sent_at": formatted_time
     })
+
 # [가드 1] 사용자가 메모 작성 페이지에 들어올 때 (앞문 단속)
 @app.route("/memo")
 def memo_page():
