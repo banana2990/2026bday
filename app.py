@@ -15,10 +15,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-# 앱 시작 시 테이블 자동 생성
-with app.app_context():
-    db.create_all()
-
 # ── 환경변수 ──────────────────────────────────────────────────────
 KAKAO_JS_KEY       = os.environ.get("KAKAO_JAVASCRIPT_KEY", "")
 KAKAO_REST_KEY     = os.environ.get("KAKAO_REST_API_KEY", "")
@@ -57,6 +53,10 @@ class Message(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
+# 모델 정의 후 테이블 자동 생성
+with app.app_context():
+    db.create_all()
 
 # ── 라우트 ────────────────────────────────────────────────────────
 
@@ -139,16 +139,5 @@ def logout():
     return redirect(url_for("home"))
 
 
-# ── DB 초기화 CLI ─────────────────────────────────────────────────
-
-@app.cli.command("init-db")
-def init_db():
-    with app.app_context():
-        db.create_all()
-    print("DB 테이블이 생성되었습니다.")
-
-
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
