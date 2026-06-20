@@ -78,23 +78,22 @@ function checkDuplicateUsername() {
         });
 }
 
-// URL 파라미터가 아니라 실제 화면에 뿌려진 돔(DOM) 배너 엘리먼트로 판단합니다.
 window.addEventListener('DOMContentLoaded', () => {
     const errorBanner = document.querySelector('.error-banner');
     const successBanner = document.querySelector('.success-banner');
 
     if (errorBanner) {
         const errorMsg = errorBanner.innerText;
-        // 문구 기반 분기 처리
+        // 실패 문구에 따라 해당 입력 창으로 탭을 자동 고정 유지
         if (errorMsg.includes('아이디입니다') || errorMsg.includes('필드를 입력')) {
             showSection('auth-register');
         } else if (errorMsg.includes('회원 정보가 없습니다')) {
             showSection('auth-reset');
         } else {
+            // "아이디 또는 비밀번호가 틀렸습니다"일 때 여기로 수렴하여 일반 로그인 폼 유지!
             showSection('auth-login');
         }
     } else if (successBanner) {
-        // 성공 배너가 떠 있다면 로그인 폼 섹션을 열어줍니다.
         showSection('auth-login');
     }
 });
