@@ -5,174 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>2026 탄신일 기념 퀴즈</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
-  <style>
-    /* 퀴즈 전용 스타일 추가 */
-    .quiz-container { max-width: 500px; margin: 40px auto; padding: 20px; text-align: center; }
-    .question-box { font-size: 1.25rem; font-weight: bold; margin-bottom: 24px; min-height: 60px; }
-    .options-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-
-    .option-btn {
-      width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px;
-      background: #fff; font-size: 1rem; cursor: pointer; text-align: left; transition: all 0.2s;
-    }
-    .option-btn:hover { background: #f1f3f5; }
-    .option-btn.selected { background: #4a90e2; color: white; border-color: #6B8E23; font-weight: bold; }
-
-    /* 하단 진행 점(Dots) 스타일 */
-    .dots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-    .dot {
-      width: 12px; height: 12px; border-radius: 50%; background: #e0e0e0; cursor: pointer; transition: all 0.2s;
-    }
-    .dot.active { border: 2px solid #333; transform: scale(1.1); }
-    .dot.marked { background: #6B8E23; } /* 답을 마킹한 번호 */
-
-    /* 제출 버튼 */
-    .btn-submit-quiz {
-      width: 100%; height: 50px; background-color: #2e7d32; color: white;
-      border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold;
-      cursor: pointer; display: none; /* 조건 충족 전까지 숨김 */
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}" />
 </head>
 <body>
 
 <div class="card quiz-container">
   <div id="quiz-progress-text" style="font-size: 0.9rem; color: #888; margin-bottom: 8px;">📋 문제 1 / 20</div>
-
   <div id="question-text" class="question-box">문제를 불러오는 중입니다...</div>
-
-  <div class="options-group" id="options-container">
-  </div>
-
-  <div class="dots-container" id="dots-container">
-  </div>
+  <div class="options-group" id="options-container"></div>
+  <div class="dots-container" id="dots-container"></div>
 
   <form id="quiz-form" action="/submit-quiz" method="POST">
     <input type="hidden" name="answers" id="answers-hidden-input">
     <button type="submit" id="submit-quiz-btn" class="btn-submit-quiz">🎯 최종 결과 제출하기</button>
   </form>
-
 </div>
 
 <a href="/" class="link-back" style="margin-top: 30px; display: inline-block; width:100%; text-align:center;">🏠홈으로 돌아가기</a>
 
 <script src="{{ url_for('static', filename='js/quiz_data.js') }}"></script>
-
-<script>
-  // 유저의 답안 목록 배열 (quizData 배열 길이인 20개에 맞추어 유연하게 공간 생성)
-  let userAnswers = new Array(quizData.length).fill(null);
-  let currentIdx = 0; // 현재 바라보고 있는 문제 번호 인덱스 (0 = 1번문제)
-
-  // DOM 캐싱
-  const questionText = document.getElementById('question-text');
-  const optionsContainer = document.getElementById('options-container');
-  const dotsContainer = document.getElementById('dots-container');
-  const progressText = document.getElementById('quiz-progress-text');
-  const submitBtn = document.getElementById('submit-quiz-btn');
-  const hiddenInput = document.getElementById('answers-hidden-input');
-
-  // 1. 초기 셋팅: 하단 점(Dots) 데이터 개수만큼 초기화 생성
-  function initDots() {
-    dotsContainer.innerHTML = "";
-    for(let i = 0; i < quizData.length; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'dot';
-      dot.title = `${i + 1}번 문제로 이동`;
-
-      // 점을 클릭하면 해당 문제 인덱스로 스위칭 점프
-      dot.addEventListener('click', () => {
-        goToQuestion(i);
-      });
-      dotsContainer.appendChild(dot);
-    }
-  }
-
-  // 2. 특정 순서의 문제 및 보기 화면 렌더링
-  function renderQuiz() {
-    const currentQuiz = quizData[currentIdx];
-
-    // 상단 스텝 텍스트 및 문제 내용 교체
-    progressText.innerText = `📋 문제 ${currentQuiz.id} / ${quizData.length}`;
-    questionText.innerText = currentQuiz.question;
-
-    // 보기 그룹 클리어 후 배열 개수(3개)만큼 동적 버튼 생성
-    optionsContainer.innerHTML = "";
-    currentQuiz.options.forEach((option, optIdx) => {
-      const btn = document.createElement('button');
-      btn.className = 'option-btn';
-      btn.type = 'button';
-      btn.innerText = `${optIdx + 1}. ${option}`;
-
-      // 이미 이전에 찍어둔 이력이 있다면 selected 디자인 적용
-      if(userAnswers[currentIdx] === optIdx) {
-        btn.classList.add('selected');
-      }
-
-      // 보기 선택 액션 바인딩
-      btn.addEventListener('click', () => {
-        selectOption(optIdx);
-      });
-      optionsContainer.appendChild(btn);
-    });
-
-    // 상태 바인딩 가이드 UI 갱신
-    updateDotsUI();
-    checkSubmitCondition();
-  }
-
-  // 3. 보기 마킹 및 오토 인크리먼트 페이지 스위칭
-  function selectOption(optIdx) {
-    userAnswers[currentIdx] = optIdx;
-
-    if (currentIdx < quizData.length - 1) {
-      currentIdx++;
-      renderQuiz();
-    } else {
-      // 20번째 마지막 문제에 다다랐을 때는 화면 마킹 선택 상태 유지
-      renderQuiz();
-    }
-  }
-
-  // 4. 점(Dots) 컴포넌트 클래스 활성화 가드
-  function updateDotsUI() {
-    const dots = document.querySelectorAll('.dot');
-    dots.forEach((dot, i) => {
-      dot.classList.remove('active', 'marked');
-
-      if (i === currentIdx) {
-        dot.classList.add('active'); // 현 위치 표시
-      }
-      if (userAnswers[i] !== null) {
-        dot.classList.add('marked'); // 마킹 상태 완료 표시
-      }
-    });
-  }
-
-  // 5. 인디케이터 점 다이렉트 탭 전환
-  function goToQuestion(idx) {
-    currentIdx = idx;
-    renderQuiz();
-  }
-
-  // 6. 예외 구멍 검사 후 최종 폼 서브밋 액션 노출 분기
-  function checkSubmitCondition() {
-    const isAllAnswered = userAnswers.every(ans => ans !== null);
-    const isLastPage = (currentIdx === quizData.length - 1);
-
-    if (isAllAnswered && isLastPage) {
-      // 20개 선택 인덱스 스냅샷 배열을 문자열화 처리하여 hidden 필드에 주입
-      hiddenInput.value = JSON.stringify(userAnswers);
-      submitBtn.style.display = 'block';
-    } else {
-      submitBtn.style.display = 'none';
-    }
-  }
-
-  // DOM 트리 바인딩 완료 시 라이프사이클 구동
-  document.addEventListener('DOMContentLoaded', () => {
-    initDots();
-    renderQuiz();
-  });
-</script>
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
 </body>
 </html>
