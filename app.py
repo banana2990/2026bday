@@ -75,7 +75,6 @@ class Message(db.Model):
 
 # 모델 정의 후 테이블 자동 생성
 with app.app_context():
-    db.drop_all()
     db.create_all()
 
 # ── 라우트 ────────────────────────────────────────────────────────
