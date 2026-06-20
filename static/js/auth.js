@@ -78,32 +78,32 @@ function checkDuplicateUsername() {
         });
 }
 
-// 사용자가 중복확인을 통과한 후 아이디를 다시 수정하면, 가입 버튼을 다시 잠그는 디테일 처리
+// URL 파라미터가 아니라 실제 화면에 뿌려진 돔(DOM) 배너 엘리먼트로 판단합니다.
 window.addEventListener('DOMContentLoaded', () => {
-    const usernameInput = document.getElementById('reg-username');
-    if (usernameInput) {
-        usernameInput.addEventListener('input', () => {
-            if (isUsernameChecked) {
-                isUsernameChecked = false;
-                const msgDiv = document.getElementById('username-check-msg');
-                const submitBtn = document.getElementById('reg-submit-btn');
+    const errorBanner = document.querySelector('.error-banner');
+    const successBanner = document.querySelector('.success-banner');
 
-                msgDiv.style.display = 'block';
-                msgDiv.style.color = '#e65100';
-                msgDiv.innerText = "아이디가 변경되었습니다. 다시 중복확인을 해주세요.";
-
-                submitBtn.disabled = true;
-                submitBtn.style.backgroundColor = '#cccccc';
-                submitBtn.style.cursor = 'not-allowed';
-            }
-        });
+    if (errorBanner) {
+        const errorMsg = errorBanner.innerText;
+        // 문구 기반 분기 처리
+        if (errorMsg.includes('아이디입니다') || errorMsg.includes('필드를 입력')) {
+            showSection('auth-register');
+        } else if (errorMsg.includes('회원 정보가 없습니다')) {
+            showSection('auth-reset');
+        } else {
+            showSection('auth-login');
+        }
+    } else if (successBanner) {
+        // 성공 배너가 떠 있다면 로그인 폼 섹션을 열어줍니다.
+        showSection('auth-login');
     }
 });
 
 /**
  *  화면 렌더링 섹션 전환 (SPA 방식)
  *  @param {string} targetId - 보여줄 영역의 ID ('auth-start', 'auth-login', 'auth-register')
- *  기존 showSection 보완: 화면을 전환할 때 중복확인 상태도 깨끗하게 리셋해줍니다.
+ *
+ * 기존 showSection 보완: 화면을 전환할 때 중복확인 상태도 깨끗하게 리셋해줍니다.
  */
 function showSection(targetId) {
     const sections = document.querySelectorAll('.auth-section');

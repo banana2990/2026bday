@@ -102,9 +102,20 @@
     </div>
     {% endif %}
 
-    {% if request.args.get('login_error') %}
-    <div class="error-banner">{{ request.args.get('login_error') }}</div>
+    {% with errors = get_flashed_messages(category_filter=["login_error"]) %}
+    {% if errors %}
+    <div class="error-banner">{{ errors[0] }}</div>
     {% endif %}
+    {% endwith %}
+
+    {% with successes = get_flashed_messages(category_filter=["login_success"]) %}
+    {% if successes %}
+    <div class="success-banner" style="background-color: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem;">
+        {{ successes[0] }}
+    </div>
+    {% endif %}
+    {% endwith %}
+
 
     {% else %}
     <div class="user-card">

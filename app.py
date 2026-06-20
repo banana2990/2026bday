@@ -1,8 +1,7 @@
 import os
 import requests
 from datetime import datetime
-from flask import jsonify  # 맨 위에 jsonify가 없다면 import에 추가해 주세요!
-from flask import Flask, render_template, redirect, request, session, url_for
+from flask import Flask, render_template, redirect, request, session, url_for, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -205,7 +204,8 @@ def local_login():
         session["profile_image"] = user.profile_image
         return redirect(url_for("home"))
 
-    return redirect(url_for("home") + "?login_error=아이디 또는 비밀번호가 틀렸습니다.")
+    flash("아이디 또는 비밀번호가 틀렸습니다.", "login_error")
+    return redirect(url_for("home"))
 
 # [Local] 비밀번호 초기화(재설정) 처리
 @app.route("/reset-password", methods=["POST"])
@@ -215,19 +215,19 @@ def reset_password():
     new_password = request.form.get("new_password")
 
     if not username or not nickname or not new_password:
-        return redirect(url_for("home") + "?login_error=모든 필드를 입력해주세요.")
+        flash("모든 필드를 입력해주세요.", "login_error") # 덮어씌울 파라미터 이름 역할을 '카테고리'로 줍니다.
+        return redirect(url_for("home"))
 
-    # 1) 일반 로그인 유저 중 아이디와 닉네임이 모두 일치하는 유저 찾기
     user = User.query.filter_by(username=username, nickname=nickname, login_type="local").first()
 
     if user:
-        # 2) 비밀번호 변경 및 해시화 저장
         user.set_password(new_password)
         db.session.commit()
-        return redirect(url_for("home") + "?login_success=비밀번호가 성공적으로 변경되었습니다. 로그인 해주세요.")
+        flash("비밀번호가 성공적으로 변경되었습니다. 로그인 해주세요.", "login_success") # 세션 플래시 저장
+        return redirect(url_for("home")) # URL 뒤에 아무것도 안 붙고 깔끔하게 이동!
 
-    # 일치하는 정보가 없을 때
-    return redirect(url_for("home") + "?login_error=일치하는 회원 정보가 없습니다.")
+    flash("일치하는 회원 정보가 없습니다.", "login_error")
+    return redirect(url_for("home"))
 
 # [Local] 회원가입 아이디 중복 확인 API (JSON 반환)
 @app.route("/check-username", methods=["POST"])
