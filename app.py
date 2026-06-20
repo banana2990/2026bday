@@ -79,7 +79,7 @@ class UserMemo(db.Model):
 
 with app.app_context():
     ## TODO:: 1차 배포 후 제대로 생성된 거 확인 하고나서는 초기화 되지 않게 지우기
-    db.drop_all()
+    ##db.drop_all()
     db.create_all()
 
 # ── 라우트 ────────────────────────────────────────────────────────
@@ -480,12 +480,18 @@ def memo_page():
     selected_color = random.choice(colors)
 
     return render_template("memo.html", selected_color=selected_color)
-
-# 🛠️ 3. [라우터] 메모 DB 등록 처리 및 홈 이동
 @app.route("/submit-memo", methods=["POST"])
 def submit_memo():
     if "user_id" not in session:
         flash("로그인이 필요한 서비스입니다.", "login_error")
+        return redirect(url_for("home"))
+
+    current_user_id = session["user_id"]
+
+    # 🚨 [핵심 추가] 인당 최대 5개 제한 체크
+    memo_count = UserMemo.query.filter_by(user_id=current_user_id).count()
+    if memo_count >= 5:
+        flash("메모는 인당 최대 5개까지만 남길 수 있습니다.", "login_error")
         return redirect(url_for("home"))
 
     content = request.form.get("content", "").strip()
@@ -495,22 +501,83 @@ def submit_memo():
         flash("메모 내용을 입력해 주세요.", "login_error")
         return redirect(url_for("memo_page"))
 
-    # DB에 저장
-    new_memo = UserMemo(
-        user_id=session["user_id"],
-        content=content,
-        bg_color=bg_color
-    )
+    new_memo = UserMemo(user_id=current_user_id, content=content, bg_color=bg_color)
     db.session.add(new_memo)
     db.session.commit()
 
-    flash("메모가 예쁘게 붙었습니다! 📌", "success") # 성공 알림 (선택)
     return redirect(url_for("home"))
 
+@app.route("/my-records")
+def my_records():
+    if "user_id" not in session:
+        flash("로그인이 필요한 서비스입니다.", "login_error")
+        return redirect(url_for("home"))
+
+    current_user_id = session["user_id"]
+    current_user = db.session.get(User, current_user_id)
+
+    # 1) 이 유저가 참여한 모든 퀴즈 시도 이력 가져오기 (1회차, 2회차, 3회차 순)
+    attempts = QuizAttempt.query.filter_by(user_id=current_user_id).order_by(QuizAttempt.id.asc()).all()
+
+    quiz_results = []
+    for idx, att in enumerate(attempts):
+        # 점수별 상품 분기 매핑
+        if att.total_score == 100:
+            prize = "👑 1등 기프티콘 3만원권"
+        elif att.total_score >= 80:
+            prize = "🎁 2등 스타벅스 세트"
+        elif att.total_score >= 50:
+            prize = "☕ 3등 바나나우유"
+        else:
+            prize = "🤍 참가상 (사랑과 감사)"
+
+        quiz_results.append({
+            "round": idx + 1,
+            "correct_count": att.correct_count,
+            "score": att.total_score,
+            "prize": prize,
+            "is_sent": "Y" if current_user.sent_at else "N" # 유저 테이블의 sent_at 유무로 발송 판단
+        })
+
+    # 2) 이 유저가 남긴 메모 목록 가져오기
+    my_memos = UserMemo.query.filter_by(user_id=current_user_id).order_by(UserMemo.created_at.desc()).all()
+
+    return render_template("my_records.html", quiz_results=quiz_results, my_memos=my_memos)
 
 
+# [API] 메모 수정 처리
+@app.route("/api/memo/update/<int:memo_id>", methods=["POST"])
+def update_memo_api(memo_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
+    memo = db.session.get(UserMemo, memo_id)
+    if not memo or memo.user_id != session["user_id"]:
+        return jsonify({"success": False, "message": "권한이 없습니다."}), 403
 
+    data = request.get_json()
+    new_content = data.get("content", "").strip()
+
+    if not new_content:
+        return jsonify({"success": False, "message": "내용을 입력해 주세요."})
+
+    memo.content = new_content
+    db.session.commit()
+    return jsonify({"success": True, "message": "메모가 성공적으로 수정되었습니다."})
+
+# [API] 메모 삭제 처리
+@app.route("/api/memo/delete/<int:memo_id>", methods=["POST"])
+def delete_memo_api(memo_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    memo = db.session.get(UserMemo, memo_id)
+    if not memo or memo.user_id != session["user_id"]:
+        return jsonify({"success": False, "message": "권한이 없습니다."}), 403
+
+    db.session.delete(memo)
+    db.session.commit()
+    return jsonify({"success": True, "message": "메모가 삭제되었습니다."})
 
 
 if __name__ == "__main__":
