@@ -430,6 +430,25 @@ def send_product(target_user_id):
         "sent_at": formatted_time
     })
 
+# [Admin] 발송 취소 처리 API
+@app.route("/admin/cancel-product/<int:target_user_id>", methods=["POST"])
+def cancel_product(target_user_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "인증 정보가 없습니다."}), 401
+
+    current_user = db.session.get(User, session["user_id"])
+    if not current_user or current_user.kakao_id != 4953979045:
+        return jsonify({"success": False, "message": "권한이 없습니다."}), 403
+
+    target_user = db.session.get(User, target_user_id)
+    if not target_user:
+        return jsonify({"success": False, "message": "존재하지 않는 사용자입니다."}), 442
+
+    # 발송 상태를 NULL로 되돌림
+    target_user.sent_at = None
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "발송이 취소되었습니다."})
 
 # [Memo] 사용자가 메모 작성 페이지에 들어올 때 (앞문 단속)
 @app.route("/memo")
