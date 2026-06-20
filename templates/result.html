@@ -25,7 +25,7 @@
   <p style="font-size: 1.05rem;"> 20 문제 중 <strong>{{ count }}문제</strong>를 맞추셨습니다!</p>
 
   <div class="prize-display-box">
-    당첨 상품: <span id="display-prize-name">상품 로딩 중...</span>
+    상품 : <span id="display-prize-name">상품 로딩 중...</span>
   </div>
 
   <script src="{{ url_for('static', filename='js/prize_manager.js') }}"></script>
@@ -41,7 +41,7 @@
 
   {% if attempt_count < 3 %}
   <div style="background-color: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eaeaea;">
-    <p style="font-size: 0.9rem; color: #333; font-weight: bold; text-align: left; margin-bottom: 10px;">
+    <p style="font-size: 0.9rem; color: #333; font-weight: bold; text-align: left;">
       이 점수로 이벤트 응모하기
     </p>
     <form action="/submit-contact" method="POST">
