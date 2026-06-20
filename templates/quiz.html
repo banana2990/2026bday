@@ -16,7 +16,7 @@
       background: #fff; font-size: 1rem; cursor: pointer; text-align: left; transition: all 0.2s;
     }
     .option-btn:hover { background: #f1f3f5; }
-    .option-btn.selected { background: #4a90e2; color: white; border-color: #4a90e2; font-weight: bold; }
+    .option-btn.selected { background: #4a90e2; color: white; border-color: #6B8E23; font-weight: bold; }
 
     /* 하단 진행 점(Dots) 스타일 */
     .dots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
@@ -24,7 +24,7 @@
       width: 12px; height: 12px; border-radius: 50%; background: #e0e0e0; cursor: pointer; transition: all 0.2s;
     }
     .dot.active { border: 2px solid #333; transform: scale(1.1); }
-    .dot.marked { background: #4a90e2; } /* 답을 마킹한 번호 */
+    .dot.marked { background: #6B8E23; } /* 답을 마킹한 번호 */
 
     /* 제출 버튼 */
     .btn-submit-quiz {
@@ -53,6 +53,8 @@
   </form>
 
 </div>
+
+<a href="/" class="link-back" style="margin-top: 30px; display: inline-block; width:100%; text-align:center;">🏠홈으로 돌아가기</a>
 
 <script src="{{ url_for('static', filename='js/quiz_data.js') }}"></script>
 
