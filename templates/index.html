@@ -30,7 +30,7 @@
     {% if not user %}
     <div id="auth-start" class="auth-section active">
         <div class="hero-emoji">🎲</div>
-        <h1 class="hero-title"><span>김씨</span> 퀴즈</h1>
+        <h1 class="hero-title"><span>2026</span>김씨퀴즈</h1>
         <p class="hero-sub">당신은 김예진을 얼마나 알고 있나요?</p>
 
         <button class="btn-kakao" onclick="kakaoLogin()">
@@ -96,12 +96,6 @@
         </div>
     </div>
 
-    {% if request.args.get('login_success') %}
-    <div class="success-banner" style="background-color: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem;">
-        {{ request.args.get('login_success') }}
-    </div>
-    {% endif %}
-
     {% with errors = get_flashed_messages(category_filter=["login_error"]) %}
     {% if errors %}
     <div class="error-banner">{{ errors[0] }}</div>
@@ -115,7 +109,6 @@
     </div>
     {% endif %}
     {% endwith %}
-
 
     {% else %}
     <div class="user-card">
