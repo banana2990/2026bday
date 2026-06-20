@@ -22,7 +22,7 @@
   <p style="color: #666; margin-top: 5px;">고생하셨습니다. 과연 나의 점수는?</p>
 
   <div class="score-badge">{{ score }}점</div>
-  <p style="font-size: 1.05rem;">3지선다 문제 중 <strong>{{ count }}문제</strong>를 맞추셨습니다!</p>
+  <p style="font-size: 1.05rem;"> 20 문제 중 <strong>{{ count }}문제</strong>를 맞추셨습니다!</p>
 
   <div class="prize-box">
     <span style="font-size: 0.85rem; color: #666;">✨ 이번 회차 당첨 결과 ✨</span>
@@ -34,29 +34,29 @@
   {% if attempt_count < 3 %}
   <div style="background-color: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eaeaea;">
     <p style="font-size: 0.9rem; color: #333; font-weight: bold; text-align: left; margin-bottom: 10px;">
-      🎁 방법 1. 이 점수가 마음에 들면 이벤트 응모하기
+      1. 이 점수가 마음에 들면 이벤트 응모하기
     </p>
     <form action="/submit-contact" method="POST">
       <input type="text" name="contact_info" placeholder="인스타 ID 또는 핸드폰 번호" required class="form-input" style="margin-bottom: 10px;">
-      <button type="submit" class="btn-home-go" style="background-color: #2e7d32;">정보 제출하고 홈으로 가기</button>
+      <button type="submit" class="btn-home-go" style="background-color: #2e7d32;"> 제출하고 홈으로 가기</button>
     </form>
   </div>
 
   <div style="margin-top: 20px;">
-    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">점수가 아쉬운가요? (현재 도전 횟수: {{ attempt_count }} / 3회)</p>
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;"> 점수가 아쉬운가요? (현재 도전 횟수: {{ attempt_count }} / 3회)</p>
     <a href="/quiz/start" class="btn-home-go" style="background-color: #7f8c8d; text-decoration: none; line-height: 48px; height: 48px;">
-      🔄 방법 2. 연락처 안 남기고 다시 도전하기
+     2. 다시 도전하기
     </a>
   </div>
   {% else %}
   <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #856404; font-size: 0.85rem; border: 1px solid #ffeeba; text-align: left;">
-    🚨 <strong>3회의 모든 도전 기회를 사용하셨습니다!</strong><br>
-    이제 아래 창에 최종 정보를 기입하셔야 완료됩니다. (관리자 화면에는 3번의 시도 중 가장 높은 최고 점수만 기록되어 제출됩니다.)
+    <strong> 모든 도전 기회를 사용하셨습니다!</strong><br>
+    이제 아래 창에 최종 정보를 기입하셔야 완료됩니다. (3번 중 최고 점수로 제출됩니다.)
   </div>
 
   <form action="/submit-contact" method="POST">
     <input type="text" name="contact_info" placeholder="인스타 ID 또는 핸드폰 번호" required class="form-input">
-    <button type="submit" class="btn-home-go" style="background-color: #4a90e2;">🎯 최종 이벤트 참여 완료하기</button>
+    <button type="submit" class="btn-home-go" style="background-color: #4a90e2;">🎯 이벤트 참여 완료하기</button>
   </form>
   {% endif %}
 </div>
