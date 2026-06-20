@@ -78,8 +78,6 @@ class UserMemo(db.Model):
     user = db.relationship('User', backref=db.backref('memos', lazy=True))
 
 with app.app_context():
-    ## TODO:: 1차 배포 후 제대로 생성된 거 확인 하고나서는 초기화 되지 않게 지우기
-    ##db.drop_all()
     db.create_all()
 
 # ── 라우트 ────────────────────────────────────────────────────────
@@ -466,20 +464,27 @@ def send_product(target_user_id):
         "message": "발송 처리가 완료되었습니다.",
         "sent_at": formatted_time
     })
-
-
+# [가드 1] 사용자가 메모 작성 페이지에 들어올 때 (앞문 단속)
 @app.route("/memo")
 def memo_page():
     if "user_id" not in session:
         flash("로그인이 필요한 서비스입니다.", "login_error")
         return redirect(url_for("home"))
 
-    # 프론트엔드에서 랜덤 선택할 수 있도록 4가지 색상 클래스를 리스트로 전달
+    # 현재 개수 체크
+    memo_count = UserMemo.query.filter_by(user_id=session["user_id"]).count()
+    if memo_count >= 5:
+        flash("이미 최대 메모 개수(5개)를 채우셨습니다. '내 기록 확인'에서 기존 메모를 관리해 주세요!", "login_error")
+        return redirect(url_for("home"))
+
     colors = ['postit-yellow', 'postit-pink', 'postit-green', 'postit-blue']
     import random
     selected_color = random.choice(colors)
 
     return render_template("memo.html", selected_color=selected_color)
+
+
+# [가드 2] 사용자가 전송 버튼을 눌러 DB에 저장할 때 (뒷문 단속 - 연타 및 우회 방지)
 @app.route("/submit-memo", methods=["POST"])
 def submit_memo():
     if "user_id" not in session:
@@ -488,9 +493,9 @@ def submit_memo():
 
     current_user_id = session["user_id"]
 
-    # 🚨 [핵심 추가] 인당 최대 5개 제한 체크
-    memo_count = UserMemo.query.filter_by(user_id=current_user_id).count()
-    if memo_count >= 5:
+    # 🚨 혹시 모를 동시 요청이나 우회를 막기 위해 저장 직전 최종 카운트 한 번 더!
+    final_count = UserMemo.query.filter_by(user_id=current_user_id).count()
+    if final_count >= 5:
         flash("메모는 인당 최대 5개까지만 남길 수 있습니다.", "login_error")
         return redirect(url_for("home"))
 
