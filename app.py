@@ -273,7 +273,7 @@ def quiz_start_page():
     attempts_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
 
     if attempts_count >= 3:
-        flash("이미 3회의 참여 기회를 모두 사용하셨습니다. (최대 3회)", "login_error")
+        flash("이미 참여 기회를 모두 사용하셨습니다. <br/> (최대 3회)", "login_error")
         return redirect(url_for("home"))
 
     return render_template("quiz.html")
@@ -435,7 +435,7 @@ def memo_page():
 
     memo_count = UserMemo.query.filter_by(user_id=session["user_id"]).count()
     if memo_count >= 5:
-        flash("이미 최대 메모 개수(5개)를 채우셨습니다. '내 기록 확인'에서 기존 메모를 관리해 주세요!", "login_error")
+        flash("이미 최대 메모 개수(5개)를 채우셨습니다. <br/> '내 기록 확인'에서 기존 메모를 관리해 주세요!", "login_error")
         return redirect(url_for("home"))
 
     colors = ['postit-yellow', 'postit-pink', 'postit-green', 'postit-blue']
