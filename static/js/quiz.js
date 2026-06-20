@@ -46,7 +46,7 @@ function selectOption(optIdx) {
             currentIdx++;
             renderQuiz();
         }
-    }, 1000);
+    }, 500);
 }
 
 function updateDotsUI() {
