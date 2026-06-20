@@ -15,6 +15,10 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
+# 앱 시작 시 테이블 자동 생성
+with app.app_context():
+    db.create_all()
+
 # ── 환경변수 ──────────────────────────────────────────────────────
 KAKAO_JS_KEY       = os.environ.get("KAKAO_JAVASCRIPT_KEY", "")
 KAKAO_REST_KEY     = os.environ.get("KAKAO_REST_API_KEY", "")

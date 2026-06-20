@@ -1,202 +1,31 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>김씨 퀴즈</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="소시민 김씨">
+    <meta name="keywords" content="[2026 김예진 탄신일 기념 퀴즈]">
+    <meta name="description" content="20개의 질문을 맞춰라!">
+
+    <!-- sns share -->
+    <meta property="og:url" content="https://kimsquiz2026.onrender.com" />
+    <meta property="og:title" content="[2026 김예진 탄신일 기념 퀴즈]" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/static/img/sweetbell.jpg" />
+    <meta property="og:description" content="20개의 질문을 맞춰라!" />
+
+    <!--favicon-->
+    <link rel="shortcut icon" href="/static/img/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" href="/static/img/favicon.ico" />
+
+    <title>
+        2026 김예진 탄신일 퀴즈
+    </title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
 
     <!-- 카카오 JavaScript SDK 2.8.1 -->
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.8.1/kakao.min.js"></script>
-
-    <style>
-        :root {
-            --yellow:   #FEE500;
-            --yellow-h: #E6CE00;
-            --brown:    #3C1E1E;
-            --bg:       #F5F3EE;
-            --surface:  #FFFFFF;
-            --border:   #E2DDD6;
-            --ink:      #1A1A1A;
-            --ink2:     #6B6B6B;
-            --red:      #FF4B4B;
-            --radius:   20px;
-            --sh:       0 8px 32px rgba(0,0,0,0.10);
-        }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-            background: var(--bg);
-            min-height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 16px;
-        }
-
-        /* ── 카드 ── */
-        .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--sh);
-            padding: 48px 40px 40px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        /* ── 비로그인 헤더 ── */
-        .hero-emoji { font-size: 56px; line-height: 1; margin-bottom: 16px; }
-        .hero-title {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -0.8px;
-            color: var(--ink);
-        }
-        .hero-title span { color: var(--yellow-h); }
-        .hero-sub {
-            color: var(--ink2);
-            font-size: 14px;
-            margin-top: 8px;
-            line-height: 1.6;
-        }
-
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 32px 0;
-        }
-
-        /* ── 카카오 로그인 버튼 ── */
-        .btn-kakao {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 15px;
-            background: var(--yellow);
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--brown);
-            letter-spacing: -0.2px;
-            transition: background .15s, transform .1s;
-            user-select: none;
-        }
-        .btn-kakao:hover  { background: var(--yellow-h); }
-        .btn-kakao:active { transform: scale(0.98); }
-
-        /* ── 에러 배너 ── */
-        .error-banner {
-            background: #FFF0F0;
-            border: 1px solid #FFCECE;
-            border-radius: 10px;
-            padding: 12px 14px;
-            color: var(--red);
-            font-size: 13px;
-            margin-top: 16px;
-        }
-
-        /* ── 로그인 후: 유저 카드 ── */
-        .user-card {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: #F9F7F3;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 24px;
-            text-align: left;
-        }
-        .user-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: var(--yellow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .user-name    { font-weight: 700; font-size: 16px; color: var(--ink); }
-        .user-greeting { font-size: 13px; color: var(--ink2); margin-top: 2px; }
-
-        /* ── 메뉴 3개 ── */
-        .menu-grid { display: flex; flex-direction: column; gap: 10px; }
-
-        .menu-btn {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            width: 100%;
-            padding: 16px 18px;
-            border: 1.5px solid var(--border);
-            border-radius: 14px;
-            background: var(--surface);
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--ink);
-            font-size: 15px;
-            font-weight: 600;
-            text-align: left;
-            transition: border-color .15s, background .15s;
-        }
-        .menu-btn:hover {
-            border-color: var(--yellow-h);
-            background: #FFFDE8;
-        }
-        .menu-btn .icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            flex-shrink: 0;
-        }
-        .menu-btn.quiz    .icon { background: #FEF9C3; }
-        .menu-btn.message .icon { background: #DCFCE7; }
-        .menu-btn.record  .icon { background: #EDE9FE; }
-
-        .menu-btn .label        { line-height: 1; }
-        .menu-btn .label small  {
-            display: block;
-            font-size: 12px;
-            font-weight: 400;
-            color: var(--ink2);
-            margin-top: 3px;
-        }
-        .menu-btn .arrow { margin-left: auto; color: var(--ink2); font-size: 18px; }
-
-        .logout-link {
-            display: block;
-            margin-top: 20px;
-            font-size: 13px;
-            color: var(--ink2);
-            text-decoration: none;
-        }
-        .logout-link:hover { color: var(--red); }
-
-        .footer {
-            margin-top: 24px;
-            font-size: 12px;
-            color: #AAA;
-        }
-
-        @media (max-width: 420px) {
-            .card { padding: 36px 24px 28px; }
-        }
-    </style>
 </head>
 <body>
 
