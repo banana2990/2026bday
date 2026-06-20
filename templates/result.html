@@ -24,10 +24,18 @@
   <div class="score-badge">{{ score }}점</div>
   <p style="font-size: 1.05rem;"> 20 문제 중 <strong>{{ count }}문제</strong>를 맞추셨습니다!</p>
 
-  <div class="prize-box">
-    <span style="font-size: 0.85rem; color: #666;">✨ 이번 회차 당첨 결과 ✨</span>
-    <div class="prize-title">{{ prize_name }}</div>
+  <div class="prize-display-box">
+    당첨 상품: <span id="display-prize-name">상품 로딩 중...</span>
   </div>
+
+  <script src="{{ url_for('static', filename='js/prize_manager.js') }}"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // 백엔드 세션에서 넘어온 실시간 점수 변수 바인딩
+      const userScore = parseInt("{{ score }}", 10);
+      document.getElementById("display-prize-name").innerText = PrizeManager.getPrizeName(userScore);
+    });
+  </script>
 
   <hr style="border: 0; height: 1px; background: #eee; margin: 25px 0;">
 

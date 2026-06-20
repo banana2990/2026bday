@@ -75,8 +75,6 @@ class UserMemo(db.Model):
     bg_color   = db.Column(db.String(10), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # 🛠️ 중복 선언 제거: User 모델에서 이미 관계를 맺었으므로 여기서는 정의하지 않거나 생략합니다.
-
 
 with app.app_context():
     db.create_all()
@@ -326,7 +324,7 @@ def submit_quiz():
     return redirect(url_for("quiz_result"))
 
 
-# [Quiz] 점수별 당첨 안내 및 연락처 입력 폼 화면
+# [Quiz] 점수 정보 전달 및 결과 뷰 렌더링
 @app.route("/quiz-result")
 def quiz_result():
     if "user_id" not in session:
@@ -336,21 +334,11 @@ def quiz_result():
     count = session.get("last_correct_count", 0)
     attempt_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
 
-    prize_name = ""
-    if score == 100:
-        prize_name = "👑 1등 명예의 전당 상품 (기프티콘 3만원권)"
-    elif score >= 80:
-        prize_name = "🎁 2등 김예진 박사상 상품 (스타벅스 디저트 세트)"
-    elif score >= 50:
-        prize_name = "☕ 3등 아차상 상품 (바나나우유 기프티콘)"
-    else:
-        prize_name = "🤍 참가상 (김예진의 진심 어린 사랑과 감사)"
-
+    # 🛠️ 비즈니스 로직(prize_name) 분기 구역을 완전히 제거하고 순수 데이터만 클라이언트로 전달합니다.
     return render_template(
         "result.html",
         score=score,
         count=count,
-        prize_name=prize_name,
         attempt_count=attempt_count
     )
 
@@ -497,22 +485,13 @@ def my_records():
 
     attempts = QuizAttempt.query.filter_by(user_id=current_user_id).order_by(QuizAttempt.id.asc()).all()
 
+    # 🛠️ prize 할당 로직을 제거하고, 순수 점수 데이터셋만 보냅니다.
     quiz_results = []
     for idx, att in enumerate(attempts):
-        if att.total_score == 100:
-            prize = "👑 1등 기프티콘 3만원권"
-        elif att.total_score >= 80:
-            prize = "🎁 2등 스타벅스 세트"
-        elif att.total_score >= 50:
-            prize = "☕ 3등 바나나우유"
-        else:
-            prize = "🤍 참가상 (사랑과 감사)"
-
         quiz_results.append({
             "round": idx + 1,
             "correct_count": att.correct_count,
             "score": att.total_score,
-            "prize": prize,
             "is_sent": "Y" if current_user.sent_at else "N"
         })
 
