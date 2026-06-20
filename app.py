@@ -365,7 +365,6 @@ def submit_contact():
 
     return redirect(url_for("home"))
 
-
 # [Admin] 관리자 전용 페이지 뷰
 @app.route("/admin/dashboard")
 def admin_dashboard():
@@ -377,6 +376,7 @@ def admin_dashboard():
         flash("관리자만 접근할 수 있습니다.", "login_error")
         return redirect(url_for("home"))
 
+    # 1) 상품 발송용 유저 정보 조회
     valid_users = User.query.filter(User.contact_info.isnot(None)).all()
     contestants = []
 
@@ -398,7 +398,15 @@ def admin_dashboard():
         })
 
     contestants = sorted(contestants, key=lambda x: x['best_score'], reverse=True)
-    return render_template("admin.html", contestants=contestants)
+
+    # 2) [추가] 모든 유저의 메모를 작성 시간 역순으로 가져오기
+    all_memos = UserMemo.query.join(User).order_by(UserMemo.created_at.desc()).all()
+
+    return render_template(
+        "admin.html",
+        contestants=contestants,
+        all_memos=all_memos
+    )
 
 
 # [Admin] 발송 완료 처리 비동기 API

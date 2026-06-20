@@ -17,6 +17,8 @@
     .btn-action { padding: 5px 10px; background-color: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
     .btn-action:disabled { background-color: #ccc; cursor: not-allowed; }
     .btn-cancel { background-color: #dc3545; margin-left: 5px; }
+       /* 기존 스타일 유지하면서 추가 */
+    .admin-table td { word-break: break-all; } /* 긴 내용이 셀을 뚫고 나가지 않게 */
   </style>
 </head>
 <body>
@@ -63,6 +65,33 @@
     {% endfor %}
     </tbody>
   </table>
+
+  <div class="card admin-container" style="margin-top: 50px;">
+    <h2>📝 전체 메모 관리</h2>
+    <table class="admin-table">
+      <thead>
+      <tr>
+        <th>작성자(닉네임)</th>
+        <th>내용</th>
+        <th>작성시간</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for memo in all_memos %}
+      <tr>
+        <td><strong>{{ memo.user.nickname }}</strong></td>
+        <td style="text-align: left; padding: 10px;">{{ memo.content }}</td>
+        <td>{{ memo.created_at.strftime('%m-%d %H:%M') }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3" style="padding: 20px; color: #999;">작성된 메모가 없습니다.</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 <script>
