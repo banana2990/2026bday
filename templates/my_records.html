@@ -27,7 +27,7 @@
     </thead>
     <tbody>
     {% for res in quiz_results %}
-    <11tr>
+    <tr>
       <td><strong>{{ res.round }}</strong></td>
       <td>{{ res.correct_count }}개</td>
       <td style="color:#4a90e2; font-weight:bold;">{{ res.score }}점</td>
@@ -41,7 +41,7 @@
         <span class="status-n">예정</span>
         {% endif %}
       </td>
-    </11tr>
+    </tr>
     {% else %}
     <tr>
       <td colspan="5" style="color: #999; padding: 25px 0;">아직 제출된 퀴즈 참여 이력이 없습니다.</td>
