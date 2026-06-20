@@ -149,7 +149,7 @@ button, .form-input {
 
 /* login_error로 보낸 메시지는 빨간색 */
 .flash-message.login_error {
-    background-color: #e74c3c;
+    background-color: #a8d5ba;
 }
 
 /* login_success로 보낸 메시지는 초록색 */
