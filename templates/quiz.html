@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 탄신일 기념 퀴즈</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
+  <style>
+    /* 퀴즈 전용 스타일 추가 */
+    .quiz-container { max-width: 500px; margin: 40px auto; padding: 20px; text-align: center; }
+    .question-box { font-size: 1.25rem; font-weight: bold; margin-bottom: 24px; min-height: 60px; }
+    .options-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+
+    .option-btn {
+      width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px;
+      background: #fff; font-size: 1rem; cursor: pointer; text-align: left; transition: all 0.2s;
+    }
+    .option-btn:hover { background: #f1f3f5; }
+    .option-btn.selected { background: #4a90e2; color: white; border-color: #4a90e2; font-weight: bold; }
+
+    /* 하단 진행 점(Dots) 스타일 */
+    .dots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%; background: #e0e0e0; cursor: pointer; transition: all 0.2s;
+    }
+    .dot.active { border: 2px solid #333; transform: scale(1.1); }
+    .dot.marked { background: #4a90e2; } /* 답을 마킹한 번호 */
+
+    /* 제출 버튼 */
+    .btn-submit-quiz {
+      width: 100%; height: 50px; background-color: #2e7d32; color: white;
+      border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold;
+      cursor: pointer; display: none; /* 조건 충족 전까지 숨김 */
+    }
+  </style>
+</head>
+<body>
+
+<div class="card quiz-container">
+  <div id="quiz-progress-text" style="font-size: 0.9rem; color: #888; margin-bottom: 8px;">📋 문제 1 / 20</div>
+
+  <div id="question-text" class="question-box">문제를 불러오는 중입니다...</div>
+
+  <div class="options-group" id="options-container">
+  </div>
+
+  <div class="dots-container" id="dots-container">
+  </div>
+
+
+  <form id="quiz-form" action="/submit-quiz" method="POST">
+    <input type="hidden" name="answers" id="answers-hidden-input">
+    <button type="submit" id="submit-quiz-btn" class="btn-submit-quiz">🎯 최종 결과 제출하기</button>
+  </form>
+
+</div>
+
+<script>
+  // 20문제 하드코딩 배열 생성 예시 (실제 문제 내용으로 채우시면 됩니다)
+  const quizData = Array.from({ length: 20 }, (_, i) => ({
+    id: i + 1,
+    question: `${i + 1}번 문제입니다. 김예진에 대해 얼마나 아시나요?`,
+    options: ["1번", "2번", "3번", "4번"]
+  }));
+
+  // 유저의 답안 목록 배열 (인덱스 0~19번 공간에 유저가 고른 선택지 번호나 텍스트 저장)
+  // 아무것도 안 고른 상태는 null
+  let userAnswers = new Array(20).fill(null);
+  let currentIdx = 0; // 현재 바라보고 있는 문제 번호 인덱스 (0 = 1번문제)
+
+  // DOM 캐싱
+  const questionText = document.getElementById('question-text');
+  const optionsContainer = document.getElementById('options-container');
+  const dotsContainer = document.getElementById('dots-container');
+  const progressText = document.getElementById('quiz-progress-text');
+  const submitBtn = document.getElementById('submit-quiz-btn');
+  const hiddenInput = document.getElementById('answers-hidden-input');
+
+  // 1. 초기 셋팅: 하단 점(Dots) 20개 초기화 생성
+  function initDots() {
+    dotsContainer.innerHTML = "";
+    for(let i = 0; i < quizData.length; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.title = `${i + 1}번 문제로 이동`;
+      // 점을 클릭하면 해당 문제로 화면 점프 전환 구현
+      dot.addEventListener('click', () => {
+        goToQuestion(i);
+      });
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  // 2. 특정 순서의 문제 렌더링 함수
+  function renderQuiz() {
+    const currentQuiz = quizData[currentIdx];
+
+    // 텍스트 교체
+    progressText.innerText = `📋 문제 ${currentQuiz.id} / 20`;
+    questionText.innerText = currentQuiz.question;
+
+    // 보기 버튼 4개 초기화 및 재생성
+    optionsContainer.innerHTML = "";
+    currentQuiz.options.forEach((option, optIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.type = 'button';
+      btn.innerText = `${optIdx + 1}. ${option}`;
+
+      // 기존에 이 문제에 답을 마킹한 적이 있다면 시각적으로 selected 클래스 유지
+      if(userAnswers[currentIdx] === optIdx) {
+        btn.classList.add('selected');
+      }
+
+      // 보기 클릭 이벤트
+      btn.addEventListener('click', () => {
+        selectOption(optIdx);
+      });
+      optionsContainer.appendChild(btn);
+    });
+
+    // 하단 인디케이터 점(Dots) 상태 갱신
+    updateDotsUI();
+    // 제출 조건 충족 검사
+    checkSubmitCondition();
+  }
+
+  // 3. 보기 선택 시 처리 로직
+  function selectOption(optIdx) {
+    // 현재 문제 인덱스에 유저가 클릭한 보기 인덱스 저장
+    userAnswers[currentIdx] = optIdx;
+
+    // 다음 문제로 자동 이동 (단, 마지막 20번째 문제가 아닐 때만)
+    if (currentIdx < quizData.length - 1) {
+      currentIdx++;
+      renderQuiz();
+    } else {
+      // 20번째 문제라면 화면 갱신해서 마킹 효과만 반영
+      renderQuiz();
+    }
+  }
+
+  // 4. 점들 색상 가이드 세팅
+  function updateDotsUI() {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, i) => {
+      dot.classList.remove('active', 'marked');
+
+      if (i === currentIdx) {
+        dot.classList.add('active'); // 현재 풀고 있는 문제 표시
+      }
+      if (userAnswers[i] !== null) {
+        dot.classList.add('marked'); // 이미 답을 고른 문제 표시
+      }
+    });
+  }
+
+  // 5. 점 눌러서 임의 번호 점프
+  function goToQuestion(idx) {
+    currentIdx = idx;
+    renderQuiz();
+  }
+
+  // 6. 모든 문제가 풀렸고 20번째 화면에 도달했는지 검사 (제출 활성화 조건)
+  function checkSubmitCondition() {
+    const isAllAnswered = userAnswers.every(ans => ans !== null);
+    const isLastPage = (currentIdx === quizData.length - 1);
+
+    if (isAllAnswered && isLastPage) {
+      // JSON 스트링으로 변환하여 히든 인풋에 보관
+      hiddenInput.value = JSON.stringify(userAnswers);
+      submitBtn.style.display = 'block';
+    } else {
+      submitBtn.style.display = 'none';
+    }
+  }
+
+  // 문서 시작점 구동
+  document.addEventListener('DOMContentLoaded', () => {
+    initDots();
+    renderQuiz();
+  });
+</script>
+</body>
+</html>

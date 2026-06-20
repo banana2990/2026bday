@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 대시보드 - 상품 발송 관리</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
+  <style>
+    .admin-container { max-width: 850px; margin: 40px auto; padding: 20px; }
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+    .admin-table th, .admin-table td { padding: 12px; border: 1px solid #ddd; text-align: center; }
+    .admin-table th { background-color: #f8f9fa; font-weight: bold; }
+
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+    .status-n { background-color: #ffebee; color: #c62828; }
+    .status-y { background-color: #e8f5e9; color: #2e7d32; }
+
+    .btn-action { padding: 6px 12px; background-color: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    .btn-action:disabled { background-color: #ccc; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<div class="card admin-container">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>⚙️ 상품 발송 관리 (어드민)</h2>
+    <a href="/" class="link-back" style="margin: 0; padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; text-decoration: none; color: #333; font-size: 0.85rem;">🏠 홈으로</a>
+  </div>
+  <p style="color: #666; font-size: 0.85rem; margin-top: 5px;">
+    연락처를 기재하여 응모한 유저들의 명단입니다. (3회 꽉 채운 사람들은 그중 <strong>가장 높은 최고 점수</strong>로 고정되어 랭킹 정렬됩니다.)
+  </p>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>이름(닉네임)</th>
+      <th>연락처 / 인스타 ID</th>
+      <th>최고 점수 (참여 횟수)</th>
+      <th>발송 여부</th>
+      <th>발송 시간 (UTC)</th>
+      <th>관리</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for person in contestants %}
+    <tr id="row-{{ person.id }}">
+      <td><strong>{{ person.nickname }}</strong></td>
+      <td>{{ person.contact_info }}</td>
+      <td>
+        <span style="color: #4a90e2; font-weight: bold; font-size: 1.05rem;">{{ person.best_score }}점</span>
+        <small style="color: #999; display: block; margin-top: 2px;">({{ person.attempt_count }}회 참여)</small>
+      </td>
+      <td>
+        {% if person.sent_at %}
+        <span class="status-badge status-y" id="badge-{{ person.id }}">Y</span>
+        {% else %}
+        <span class="status-badge status-n" id="badge-{{ person.id }}">N</span>
+        {% endif %}
+      </td>
+      <td id="time-{{ person.id }}">
+        {{ person.sent_at.strftime('%Y-%m-%d %H:%M:%S') if person.sent_at else '-' }}
+      </td>
+      <td>
+        <button type="button" class="btn-action"
+                onclick="processSend('{{ person.id }}')"
+                {% if person.sent_at %} disabled {% endif %}
+                id="btn-{{ person.id }}">
+          {% if person.sent_at %} 발송완료 {% else %} 발송하기 {% endif %}
+        </button>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="6" style="color: #999; padding: 40px 0;">아직 연락처를 남기고 응모한 유저가 없습니다.</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function processSend(userId) {
+    if(!confirm("해당 유저에게 상품 발송 처리를 완료하시겠습니까?")) return;
+
+    fetch(`/admin/send-product/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+            .then(response => response.json())
+            .then(data => {
+              if(data.success) {
+                alert(data.message);
+
+                // 비동기 성공 시 날짜 기반 UI 업데이트 인터랙션 처리
+                const badge = document.getElementById(`badge-${userId}`);
+                badge.className = "status-badge status-y";
+                badge.innerText = "Y";
+
+                const timeTd = document.getElementById(`time-${userId}`);
+                timeTd.innerText = data.sent_at;
+
+                const btn = document.getElementById(`btn-${userId}`);
+                btn.disabled = true;
+                btn.innerText = "발송완료";
+              } else {
+                alert(data.message);
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('발송 처리 중 오류가 발생했습니다.');
+            });
+  }
+</script>
+</body>
+</html>

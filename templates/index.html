@@ -120,17 +120,24 @@
             {% endif %}
         </div>
         <div>
-            <div class="user-name">{{ user.nickname }}</div>
-            <div class="user-greeting">안녕하세요! 무엇을 할까요?</div>
+            <div class="user-name">안녕하세요 {{ user.nickname }} 님</div>
         </div>
     </div>
 
+    {% if user.kakao_id == 4953979045 %}
+    <div style="margin: 15px 0;">
+        <a href="/admin/dashboard" class="btn-submit" style="background-color: #e67e22; text-decoration: none; display: inline-block; text-align: center; line-height: 48px; height: 48px;">
+            ⚙️ 상품 발송하기 (관리자)
+        </a>
+    </div>
+    {% endif %}
+
     <div class="menu-grid">
-        <a href="/quiz" class="menu-btn quiz">
+        <a href="/quiz/start" class="menu-btn quiz">
             <div class="icon">🎲</div>
             <div class="label">
                 김씨 퀴즈 풀기
-                <small>랜덤 문제로 도전해보세요</small>
+                <small> 최대 3회까지 도전 가능!</small>
             </div>
             <span class="arrow">›</span>
         </a>

@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 from datetime import datetime
@@ -35,8 +36,11 @@ class User(db.Model):
 
     nickname      = db.Column(db.String(100))
     profile_image = db.Column(db.String(500))
+    contact_info  = db.Column(db.String(255), nullable=True)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
     last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # 🛠️ 관리자 발송 처리를 위한 컬럼 추가
+    sent_at       = db.Column(db.DateTime, nullable=True)
 
     quiz_attempts = db.relationship("QuizAttempt", backref="user", lazy=True)
     messages      = db.relationship("Message",      backref="user", lazy=True)
@@ -47,14 +51,19 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-
 class QuizAttempt(db.Model):
     __tablename__ = "quiz_attempts"
-    id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    is_correct = db.Column(db.Boolean,  nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id            = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id       = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
+    # 추가된 핵심 컬럼들
+    correct_count = db.Column(db.Integer, nullable=False, default=0) # 맞춘 정답 개수 (예: 17)
+    total_score   = db.Column(db.Integer, nullable=False, default=0) # 총점 (예: 85)
+
+    # 유저가 낸 20개 답안 스냅샷을 텍스트(JSON)로 통째로 저장 (추후 오답노트나 디테일 확인용)
+    selected_answers = db.Column(db.Text, nullable=False)
+
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Message(db.Model):
     __tablename__ = "messages"
@@ -66,6 +75,8 @@ class Message(db.Model):
 
 
 with app.app_context():
+    ## TODO:: 1차 배포 후 제대로 생성된 거 확인 하고나서는 초기화 되지 않게 지우기
+    db.drop_all()
     db.create_all()
 
 # ── 라우트 ────────────────────────────────────────────────────────
@@ -251,6 +262,207 @@ def check_username():
 def logout():
     session.clear()
     return redirect(url_for("home"))
+
+# [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트
+@app.route("/quiz/start")
+def quiz_start_page():
+    # 1) 로그인 안 되어 있으면 홈으로 튕기기
+    if "user_id" not in session:
+        flash("로그인이 필요한 서비스입니다.", "login_error")
+        return redirect(url_for("home"))
+
+    # 2) 현재 유저가 이미 제출한 퀴즈 카운트 조회
+    attempts_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
+
+    # 3) 3회 제한 가드 작동
+    if attempts_count >= 3:
+        flash("이미 3회의 참여 기회를 모두 사용하셨습니다. (최대 3회)", "login_error")
+        return redirect(url_for("home"))
+
+    # 4) 통과 시에만 실제 20문제짜리 퀴즈 html 화면 렌더링!
+    # (여기서 퀴즈 파일명이 default.html 이라면 "default.html"로 적어주시면 됩니다)
+    return render_template("quiz.html")
+
+# [Quiz] 20문제 일괄 제출 및 채점 처리 (횟수 제한 추가 버전)
+@app.route("/submit-quiz", methods=["POST"])
+def submit_quiz():
+    # 1) 로그인 검증
+    if "user_id" not in session:
+        flash("로그인이 필요한 서비스입니다.", "login_error")
+        return redirect(url_for("home"))
+
+    current_user_id = session["user_id"]
+
+    # 🚨 [핵심 추가] 현재 로그인한 유저의 기존 퀴즈 참여 횟수 조회 (COUNT 쿼리)
+    existing_attempts_count = QuizAttempt.query.filter_by(user_id=current_user_id).count()
+
+    # 3번 이상 참여했다면 저장을 거부하고 홈으로 튕겨냅니다.
+    if existing_attempts_count >= 3:
+        flash("퀴즈 참여는 인당 최대 3회까지만 가능합니다.", "login_error")
+        return redirect(url_for("home"))
+
+    # 2) 답안 검증 및 파싱
+    raw_answers = request.form.get("answers")
+    if not raw_answers:
+        flash("제출된 답안이 올바르지 않습니다.", "login_error")
+        return redirect(url_for("home"))
+
+    user_answers = json.loads(raw_answers)
+    correct_sheet = [2, 1, 0, 1, 0, 1, 2, 2, 0, 2, 1, 0, 1, 1, 2, 0, 0, 1, 2, 0] # 실제 정답 시트
+
+    # 3) 채점 로직
+    correct_count = 0
+    for idx, ans in enumerate(user_answers):
+        if ans == correct_sheet[idx]:
+            correct_count += 1
+
+    total_score = correct_count * 5
+
+    # 4) DB 저장
+    attempt = QuizAttempt(
+        user_id=current_user_id,
+        correct_count=correct_count,
+        total_score=total_score,
+        selected_answers=raw_answers
+    )
+
+    db.session.add(attempt)
+    db.session.commit()
+
+    session["last_correct_count"] = correct_count
+    session["last_total_score"] = total_score
+
+    return redirect(url_for("quiz_result"))
+
+    # [Quiz] 2) 점수별 당첨 안내 및 연락처 입력 폼 화면
+# [Quiz] 2) 점수별 당첨 안내 및 연락처 입력 폼 화면 (참여 횟수 카운트 추가)
+@app.route("/quiz-result")
+def quiz_result():
+    if "user_id" not in session:
+        return redirect(url_for("home"))
+
+    score = session.get("last_total_score", 0)
+    count = session.get("last_correct_count", 0)
+
+    # 🚨 [핵심 추가] 이 사용자가 지금까지 총 몇 번 제출했는지 카운트 쿼리 수행
+    attempt_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
+
+    # 비즈니스 로직: 점수별 당첨 상품 분기 처리
+    prize_name = ""
+    if score == 100:
+        prize_name = "👑 1등 명예의 전당 상품 (기프티콘 3만원권)"
+    elif score >= 80:
+        prize_name = "🎁 2등 김예진 박사상 상품 (스타벅스 디저트 세트)"
+    elif score >= 50:
+        prize_name = "☕ 3등 아차상 상품 (바나나우유 기프티콘)"
+    else:
+        prize_name = "🤍 참가상 (김예진의 진심 어린 사랑과 감사)"
+
+    # 🛠️ 템플릿으로 변수를 넘길 때 attempt_count도 함께 던져줍니다.
+    return render_template(
+        "result.html",
+        score=score,
+        count=count,
+        prize_name=prize_name,
+        attempt_count=attempt_count
+    )
+
+# [Quiz] 3) 입력받은 연락처 최종 저장 후 홈으로 리다이렉트
+@app.route("/submit-contact", methods=["POST"])
+def submit_contact():
+    if "user_id" not in session:
+        return redirect(url_for("home"))
+
+    contact_info = request.form.get("contact_info")
+
+    if contact_info:
+        # 현재 세션의 유저 정보 가져와서 contact_info 업데이트 (스프링의 더티 체킹/엔티티 수정 원리)
+        user = db.session.get(User, session["user_id"])
+        if user:
+            user.contact_info = contact_info
+            db.session.commit()
+            flash("이벤트 응모가 완료되었습니다! 홈 화면으로 이동합니다.", "login_success")
+
+    return redirect(url_for("home"))
+
+# [Admin] 1) 관리자 전용 페이지 뷰
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    if "user_id" not in session:
+        return redirect(url_for("home"))
+
+    current_user = db.session.get(User, session["user_id"])
+    if not current_user or current_user.kakao_id != 4953979045:
+        flash("관리자만 접근할 수 있습니다.", "login_error")
+        return redirect(url_for("home"))
+
+    # 1) 연락처(contact_info)를 남긴 회원들만 기본 조회
+    valid_users = User.query.filter(User.contact_info.isnot(None)).all()
+
+    contestants = []
+
+    for u in valid_users:
+        # 이 유저가 시도한 총 횟수 카운트
+        attempt_count = QuizAttempt.query.filter_by(user_id=u.id).count()
+
+        # 유저가 퀴즈를 한 번도 안 풀고 연락처만 남긴 예외 방지
+        if attempt_count == 0:
+            continue
+
+        # 이 유저가 시도한 기록 중 최고 점수 뽑아오기 (SQL의 MAX 함수 역할)
+        max_score_query = db.session.query(func.max(QuizAttempt.total_score)).filter(QuizAttempt.user_id == u.id).scalar()
+
+        # 3회가 다 쌓였을 때는 최고 점수 데이터로 고정해서 노출 변수 세팅
+        # (3회 미만일 때도 일단 현재까지의 최고 점수를 보여주도록 처리하면 유연합니다)
+        display_score = max_score_query if max_score_query is not None else 0
+
+        contestants.append({
+            "id": u.id,
+            "nickname": u.nickname,
+            "contact_info": u.contact_info,
+            "sent_at": u.sent_at,
+            "attempt_count": attempt_count, # 1, 2, 3회 중 현재 몇 회차인지 표시용
+            "best_score": display_score     # 3회 꽉 찼을 때의 최고 점수 혹은 현재 최고점
+        })
+
+    # 최고 점수 높은 순으로 정렬해서 대시보드에 서빙
+    contestants = sorted(contestants, key=lambda x: x['best_score'], reverse=True)
+
+    return render_template("admin.html", contestants=contestants)
+
+@app.route("/admin/send-product/<int:target_user_id>", methods=["POST"])
+def send_product(target_user_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "인증 정보가 없습니다."}), 401
+
+    current_user = db.session.get(User, session["user_id"])
+
+    # 🛠️ 발송 처리 API 권한 체크도 동일하게 변경!
+    if not current_user or current_user.kakao_id != 4953979045:
+        return jsonify({"success": False, "message": "권한이 없습니다."}), 403
+
+    # 대상 유저 조회 후 데이터 변경
+    target_user = db.session.get(User, target_user_id)
+    if not target_user:
+        return jsonify({"success": False, "message": "존재하지 않는 사용자입니다."}), 442
+
+    # 이미 발송된 상태라면 취소하거나 무시 처리 로직 가능
+    if target_user.sent_at:
+        return jsonify({"success": False, "message": "이미 발송 처리가 완료된 사용자입니다."})
+
+    # 비즈니스 로직: 발송 시간 업데이트 처리 (영속성 콘텍스트 더티 체킹 후 반영)
+    target_user.sent_at = datetime.utcnow()
+    db.session.commit()
+
+    # 한국 시간(KST) 표현을 위해 포맷팅 바인딩 (자바의 SimpleDateFormat 역할)
+    # utcnow() 기준이므로 현지 시간 출력을 위해 프론트에서 처리하거나 한국 시간에 맞춰 가공 가능
+    formatted_time = target_user.sent_at.strftime('%Y-%m-%d %H:%M:%S')
+
+    return jsonify({
+        "success": True,
+        "message": "발송 처리가 완료되었습니다.",
+        "sent_at": formatted_time
+    })
 
 
 if __name__ == "__main__":
