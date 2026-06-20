@@ -6,6 +6,7 @@
   <title>내 기록 확인 📋</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/my_records.css') }}" />
+  <script src="{{ url_for('static', filename='js/prize_manager.js') }}"></script>
 </head>
 <body>
 
@@ -29,7 +30,9 @@
       <td><strong>{{ res.round }}회차</strong></td>
       <td>{{ res.correct_count }}개</td>
       <td style="color:#4a90e2; font-weight:bold;">{{ res.score }}점</td>
-      <td style="font-size:0.8rem; text-align:left;">{{ res.prize }}</td>
+
+      <td class="prize-cell" data-score="{{ res.score }}" style="font-size:0.8rem; text-align:left;">계산중...</td>
+
       <td>
         {% if res.is_sent == 'Y' %}
         <span class="status-y">Y</span>
@@ -50,23 +53,19 @@
   <div class="memo-list">
     {% for memo in my_memos %}
     <div class="postit-card {{ memo.bg_color }}" id="memo-box-{{ memo.id }}">
-
       <div id="view-layer-{{ memo.id }}" class="memo-text-view">{{ memo.content }}</div>
-
       <div id="edit-layer-{{ memo.id }}" style="display: none;">
         <textarea id="textarea-{{ memo.id }}" class="memo-edit-area" maxlength="500">{{ memo.content }}</textarea>
       </div>
-
       <div class="postit-action-group">
         <button type="button" class="btn-memo-action btn-edit" id="btn-edit-{{ memo.id }}" onclick="toggleEditMode('{{ memo.id }}', true)">수정</button>
         <button type="button" class="btn-memo-action btn-delete" id="btn-del-{{ memo.id }}" onclick="deleteMemo('{{ memo.id }}')">삭제</button>
-
         <button type="button" class="btn-memo-action btn-save" id="btn-save-{{ memo.id }}" style="display: none;" onclick="saveMemo('{{ memo.id }}')">저장</button>
         <button type="button" class="btn-memo-action btn-cancel" id="btn-cancel-{{ memo.id }}" style="display: none;" onclick="toggleEditMode('{{ memo.id }}', false)">취소</button>
       </div>
     </div>
     {% else %}
-    <p style="color: #999; padding: 30px 0; text-align: center; background: #fafafa; border-radius: 8px;">아직 작성한 포스트잇 메모가 없습니다. (최대 5개 가능)</p>
+    <p style="color: #999; padding: 30px 0; text-align: center; background: #fafafa; border-radius: 8px;">아직 작성한 포스트잇 메모가 없습니다.</p>
     {% endfor %}
   </div>
 
@@ -74,42 +73,37 @@
 </div>
 
 <script>
-  // 1. 화면 전환 없는 인라인 수정 폼 토글 액션
+  // 페이지 로드 시 상품명 일괄 자동 입력
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.prize-cell').forEach(cell => {
+      const score = cell.getAttribute('data-score');
+      cell.innerText = PrizeManager.getPrizeName(score);
+    });
+  });
+
   function toggleEditMode(memoId, isEdit) {
     const viewLayer = document.getElementById(`view-layer-${memoId}`);
     const editLayer = document.getElementById(`edit-layer-${memoId}`);
-
     const btnEdit = document.getElementById(`btn-edit-${memoId}`);
     const btnDel = document.getElementById(`btn-del-${memoId}`);
     const btnSave = document.getElementById(`btn-save-${memoId}`);
     const btnCancel = document.getElementById(`btn-cancel-${memoId}`);
 
     if (isEdit) {
-      viewLayer.style.display = "none";
-      editLayer.style.display = "block";
-      btnEdit.style.display = "none";
-      btnDel.style.display = "none";
-      btnSave.style.display = "inline-block";
-      btnCancel.style.display = "inline-block";
+      viewLayer.style.display = "none"; editLayer.style.display = "block";
+      btnEdit.style.display = "none"; btnDel.style.display = "none";
+      btnSave.style.display = "inline-block"; btnCancel.style.display = "inline-block";
     } else {
-      viewLayer.style.display = "block";
-      editLayer.style.display = "none";
-      btnEdit.style.display = "inline-block";
-      btnDel.style.display = "inline-block";
-      btnSave.style.display = "none";
-      btnCancel.style.display = "none";
+      viewLayer.style.display = "block"; editLayer.style.display = "none";
+      btnEdit.style.display = "inline-block"; btnDel.style.display = "inline-block";
+      btnSave.style.display = "none"; btnCancel.style.display = "none";
     }
   }
 
-  // 2. 비동기 메모 수정 저장 API 연동
   function saveMemo(memoId) {
     const textarea = document.getElementById(`textarea-${memoId}`);
     const updatedContent = textarea.value.trim();
-
-    if(!updatedContent) {
-      alert("내용을 입력해 주세요.");
-      return;
-    }
+    if(!updatedContent) { alert("내용을 입력해 주세요."); return; }
 
     fetch(`/api/memo/update/${memoId}`, {
       method: 'POST',
@@ -121,29 +115,18 @@
               if(data.success) {
                 document.getElementById(`view-layer-${memoId}`).innerText = updatedContent;
                 toggleEditMode(memoId, false);
-              } else {
-                alert(data.message);
-              }
-            }).catch(() => alert("메모 수정 작업 중 에러가 발생했습니다."));
+              } else { alert(data.message); }
+            }).catch(() => alert("에러가 발생했습니다."));
   }
 
-  // 3. 비동기 메모 삭제 API 연동
   function deleteMemo(memoId) {
-    if(!confirm("해당 메모를 정말 삭제하시겠습니까?")) return;
-
-    fetch(`/api/memo/delete/${memoId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
+    if(!confirm("정말 삭제하시겠습니까?")) return;
+    fetch(`/api/memo/delete/${memoId}`, { method: 'POST' })
             .then(res => res.json())
             .then(data => {
-              if(data.success) {
-                const postit = document.getElementById(`memo-box-${memoId}`);
-                postit.remove();
-              } else {
-                alert(data.message);
-              }
-            }).catch(() => alert("메모 삭제 작업 중 에러가 발생했습니다."));
+              if(data.success) { document.getElementById(`memo-box-${memoId}`).remove(); }
+              else { alert(data.message); }
+            });
   }
 </script>
 </body>
