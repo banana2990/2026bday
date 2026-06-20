@@ -1,7 +1,7 @@
 import os
 import requests
 from datetime import datetime
-
+from flask import jsonify  # 맨 위에 jsonify가 없다면 import에 추가해 주세요!
 from flask import Flask, render_template, redirect, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -207,6 +207,47 @@ def local_login():
 
     return redirect(url_for("home") + "?login_error=아이디 또는 비밀번호가 틀렸습니다.")
 
+# [Local] 비밀번호 초기화(재설정) 처리
+@app.route("/reset-password", methods=["POST"])
+def reset_password():
+    username     = request.form.get("username")
+    nickname     = request.form.get("nickname")
+    new_password = request.form.get("new_password")
+
+    if not username or not nickname or not new_password:
+        return redirect(url_for("home") + "?login_error=모든 필드를 입력해주세요.")
+
+    # 1) 일반 로그인 유저 중 아이디와 닉네임이 모두 일치하는 유저 찾기
+    user = User.query.filter_by(username=username, nickname=nickname, login_type="local").first()
+
+    if user:
+        # 2) 비밀번호 변경 및 해시화 저장
+        user.set_password(new_password)
+        db.session.commit()
+        return redirect(url_for("home") + "?login_success=비밀번호가 성공적으로 변경되었습니다. 로그인 해주세요.")
+
+    # 일치하는 정보가 없을 때
+    return redirect(url_for("home") + "?login_error=일치하는 회원 정보가 없습니다.")
+
+# [Local] 회원가입 아이디 중복 확인 API (JSON 반환)
+@app.route("/check-username", methods=["POST"])
+def check_username():
+    # AJAX 요청으로 보낸 JSON 데이터를 파싱합니다.
+    data = request.get_json()
+    if not data or "username" not in data:
+        return jsonify({"is_available": False, "message": "아이디를 입력해주세요."}), 400
+
+    username = data["username"].strip()
+    if not username:
+        return jsonify({"is_available": False, "message": "공백은 아이디로 사용할 수 없습니다."}), 400
+
+    # DB에서 해당 아이디가 존재하는지 쿼리
+    existing_user = User.query.filter_by(username=username).first()
+
+    if existing_user:
+        return jsonify({"is_available": False, "message": "이미 사용 중인 아이디입니다."})
+
+    return jsonify({"is_available": True, "message": "사용 가능한 아이디입니다."})
 
 @app.route("/logout")
 def logout():

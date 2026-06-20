@@ -24,40 +24,112 @@ function kakaoLogin() {
     }
 }
 
+
+// 중복 확인 여부를 체크하는 상태 변수
+let isUsernameChecked = false;
+
 /**
- * 화면 렌더링 섹션 전환 (SPA 방식)
- * @param {string} targetId - 보여줄 영역의 ID ('auth-start', 'auth-login', 'auth-register')
+ * 아이디 중복 확인 함수 (비동기 Fetch API)
  */
-function showSection(targetId) {
-    // 1. 모든 인증 섹션을 숨깁니다.
-    const sections = document.querySelectorAll('.auth-section');
-    sections.forEach(section => {
-        section.classList.remove('active');
-    });
+function checkDuplicateUsername() {
+    const usernameInput = document.getElementById('reg-username');
+    const msgDiv = document.getElementById('username-check-msg');
+    const submitBtn = document.getElementById('reg-submit-btn');
 
-    // 2. 타겟이 되는 섹션만 노출시킵니다.
-    const targetSection = document.getElementById(targetId);
-    if (targetSection) {
-        targetSection.classList.add('active');
+    const username = usernameInput.value.trim();
+
+    if (!username) {
+        alert("아이디를 입력해주세요.");
+        return;
     }
 
-    // 3. 화면 전환 시 기존에 떠있던 에러 배너가 있다면 가독성을 위해 숨겨줍니다.
-    const errorBanner = document.querySelector('.error-banner');
-    if (errorBanner) {
-        errorBanner.style.display = 'none';
-    }
+    // Flask 백엔드로 비동기 POST 요청 전송
+    fetch('/check-username', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: username })
+    })
+        .then(response => response.json())
+        .then(data => {
+            msgDiv.style.display = 'block';
+            msgDiv.innerText = data.message;
+
+            if (data.is_available) {
+                // 사용 가능할 때: 메시지 초록색, 회원가입 버튼 활성화
+                msgDiv.style.color = '#2e7d32';
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = '#4a90e2';
+                submitBtn.style.cursor = 'pointer';
+                isUsernameChecked = true;
+            } else {
+                // 사용 불가능할 때: 메시지 빨간색, 회원가입 버튼 비활성화维持
+                msgDiv.style.color = '#c62828';
+                submitBtn.disabled = true;
+                submitBtn.style.backgroundColor = '#cccccc';
+                submitBtn.style.cursor = 'not-allowed';
+                isUsernameChecked = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('중복 확인 중 오류가 발생했습니다.');
+        });
 }
 
-// 만약 백엔드에서 에러 피드백을 갖고 세로고침 되었다면, 로그인/회원가입 화면을 유지해주는 디테일 예외 처리
+// 사용자가 중복확인을 통과한 후 아이디를 다시 수정하면, 가입 버튼을 다시 잠그는 디테일 처리
 window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('login_error')) {
-        // 회원가입 실패 실패라면 회원가입창 유지, 그 외엔 로그인창 유지
-        const errorMsg = urlParams.get('login_error');
-        if (errorMsg.includes('아이디입니다') || errorMsg.includes('필드를 입력')) {
-            showSection('auth-register');
-        } else {
-            showSection('auth-login');
-        }
+    const usernameInput = document.getElementById('reg-username');
+    if (usernameInput) {
+        usernameInput.addEventListener('input', () => {
+            if (isUsernameChecked) {
+                isUsernameChecked = false;
+                const msgDiv = document.getElementById('username-check-msg');
+                const submitBtn = document.getElementById('reg-submit-btn');
+
+                msgDiv.style.display = 'block';
+                msgDiv.style.color = '#e65100';
+                msgDiv.innerText = "아이디가 변경되었습니다. 다시 중복확인을 해주세요.";
+
+                submitBtn.disabled = true;
+                submitBtn.style.backgroundColor = '#cccccc';
+                submitBtn.style.cursor = 'not-allowed';
+            }
+        });
     }
 });
+
+/**
+ *  화면 렌더링 섹션 전환 (SPA 방식)
+ *  @param {string} targetId - 보여줄 영역의 ID ('auth-start', 'auth-login', 'auth-register')
+ *  기존 showSection 보완: 화면을 전환할 때 중복확인 상태도 깨끗하게 리셋해줍니다.
+ */
+function showSection(targetId) {
+    const sections = document.querySelectorAll('.auth-section');
+    sections.forEach(section => { section.classList.remove('active'); });
+
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) { targetSection.classList.add('active'); }
+
+    // 배너 숨기기
+    const errorBanner = document.querySelector('.error-banner');
+    if (errorBanner) { errorBanner.style.display = 'none'; }
+    const successBanner = document.querySelector('.success-banner');
+    if (successBanner) { successBanner.style.display = 'none'; }
+
+    // 회원가입창 리셋 로직
+    if (targetId !== 'auth-register') {
+        isUsernameChecked = false;
+        const msgDiv = document.getElementById('username-check-msg');
+        if (msgDiv) msgDiv.style.display = 'none';
+        const submitBtn = document.getElementById('reg-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.backgroundColor = '#cccccc';
+            submitBtn.style.cursor = 'not-allowed';
+        }
+        const regForm = document.getElementById('register-form');
+        if (regForm) regForm.reset();
+    }
+}

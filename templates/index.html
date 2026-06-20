@@ -52,9 +52,9 @@
         </form>
 
         <div class="auth-links">
-            <a href="#" onclick="showSection('auth-register')">새로 회원가입</a>
+            <a href="#" onclick="showSection('auth-register')">회원가입</a>
             <span class="lnb-divider">|</span>
-            <a href="#" onclick="alert('준비 중인 기능입니다.')">비밀번호 찾기</a>
+            <a href="#" onclick="showSection('auth-reset')">비밀번호 찾기</a>
             <span class="lnb-divider">|</span>
             <a href="#" onclick="showSection('auth-start')" class="link-back">뒤로가기</a>
         </div>
@@ -62,11 +62,16 @@
 
     <div id="auth-register" class="auth-section">
         <h2 class="section-title">회원가입</h2>
-        <form action="/register" method="POST">
-            <input type="text" name="username" placeholder="새 아이디" required class="form-input">
+        <form action="/register" method="POST" id="register-form"> <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <input type="text" name="username" id="reg-username" placeholder="새 아이디" required class="form-input" style="margin-bottom: 0; flex-grow: 1;">
+            <button type="button" onclick="checkDuplicateUsername()" style="width: 90px; height: 48px; background-color: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">중복확인</button>
+        </div>
+            <div id="username-check-msg" style="text-align: left; font-size: 0.8rem; margin-top: -5px; margin-bottom: 10px; display: none;"></div>
+
             <input type="password" name="password" placeholder="새 비밀번호" required class="form-input">
             <input type="text" name="nickname" placeholder="닉네임(이름)" required class="form-input">
-            <button type="submit" class="btn-submit btn-register">회원가입</button>
+
+            <button type="submit" id="reg-submit-btn" class="btn-submit btn-register" style="background-color: #cccccc; cursor: not-allowed;" disabled>회원가입</button>
         </form>
 
         <div class="auth-links">
@@ -75,6 +80,27 @@
             <a href="#" onclick="showSection('auth-start')" class="link-back">뒤로가기</a>
         </div>
     </div>
+
+    <div id="auth-reset" class="auth-section">
+        <h2 class="section-title">비밀번호 찾기</h2>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">가입할 때 입력한 아이디와 닉네임이 같으면 새 비밀번호로 초기화됩니다.</p>
+        <form action="/reset-password" method="POST">
+            <input type="text" name="username" placeholder="아이디" required class="form-input">
+            <input type="text" name="nickname" placeholder="닉네임(이름)" required class="form-input">
+            <input type="password" name="new_password" placeholder="새로운 비밀번호 설정" required class="form-input">
+            <button type="submit" class="btn-submit btn-register" style="background-color: #e04a4a;">비밀번호 변경하기</button>
+        </form>
+
+        <div class="auth-links">
+            <a href="#" onclick="showSection('auth-login')">로그인 화면으로 돌아가기</a>
+        </div>
+    </div>
+
+    {% if request.args.get('login_success') %}
+    <div class="success-banner" style="background-color: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem;">
+        {{ request.args.get('login_success') }}
+    </div>
+    {% endif %}
 
     {% if request.args.get('login_error') %}
     <div class="error-banner">{{ request.args.get('login_error') }}</div>
