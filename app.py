@@ -66,18 +66,20 @@ class QuizAttempt(db.Model):
 
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
-class Message(db.Model):
-    __tablename__ = "messages"
-    id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    content    = db.Column(db.Text, nullable=False)
+class UserMemo(db.Model):
+    __tablename__ = 'user_memos'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False) # 작성자 ID
+    content = db.Column(db.Text, nullable=False)                                # 메모 내용
+    bg_color = db.Column(db.String(10), nullable=False)                         # 랜덤 배정된 색상 클래스명
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Relationship (유저 테이블 이름이 User라고 가정)
+    user = db.relationship('User', backref=db.backref('memos', lazy=True))
 
 with app.app_context():
     ## TODO:: 1차 배포 후 제대로 생성된 거 확인 하고나서는 초기화 되지 않게 지우기
-    ## db.drop_all()
+    db.drop_all()
     db.create_all()
 
 # ── 라우트 ────────────────────────────────────────────────────────
@@ -464,6 +466,51 @@ def send_product(target_user_id):
         "message": "발송 처리가 완료되었습니다.",
         "sent_at": formatted_time
     })
+
+
+@app.route("/memo")
+def memo_page():
+    if "user_id" not in session:
+        flash("로그인이 필요한 서비스입니다.", "login_error")
+        return redirect(url_for("home"))
+
+    # 프론트엔드에서 랜덤 선택할 수 있도록 4가지 색상 클래스를 리스트로 전달
+    colors = ['postit-yellow', 'postit-pink', 'postit-green', 'postit-blue']
+    import random
+    selected_color = random.choice(colors)
+
+    return render_template("memo.html", selected_color=selected_color)
+
+# 🛠️ 3. [라우터] 메모 DB 등록 처리 및 홈 이동
+@app.route("/submit-memo", methods=["POST"])
+def submit_memo():
+    if "user_id" not in session:
+        flash("로그인이 필요한 서비스입니다.", "login_error")
+        return redirect(url_for("home"))
+
+    content = request.form.get("content", "").strip()
+    bg_color = request.form.get("bg_color", "postit-yellow")
+
+    if not content:
+        flash("메모 내용을 입력해 주세요.", "login_error")
+        return redirect(url_for("memo_page"))
+
+    # DB에 저장
+    new_memo = UserMemo(
+        user_id=session["user_id"],
+        content=content,
+        bg_color=bg_color
+    )
+    db.session.add(new_memo)
+    db.session.commit()
+
+    flash("메모가 예쁘게 붙었습니다! 📌", "success") # 성공 알림 (선택)
+    return redirect(url_for("home"))
+
+
+
+
+
 
 
 if __name__ == "__main__":

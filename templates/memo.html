@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>김씨에게 메모 남기기 📌</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
+  <style>
+    .memo-container { max-width: 420px; margin: 40px auto; padding: 15px; text-align: center; }
+
+    /* 📌 포스트잇 기본 모바일 스타일 */
+    .postit {
+      width: 100%;
+      aspect-ratio: 1 / 1; /* 정사각형 유지 */
+      padding: 30px 24px;
+      box-sizing: border-box;
+      box-shadow: 5px 5px 15px rgba(0,0,0,0.12), 1px 10px 20px rgba(0,0,0,0.08);
+      transform: rotate(-1deg); /* 감성을 위해 살짝 비틀기 */
+      position: relative;
+      margin-bottom: 30px;
+      border-bottom-right-radius: 30px 3px; /* 종이 끝이 살짝 휜 느낌 */
+    }
+
+    /* 🎨 파스텔톤 배경색 4종 */
+    .postit-yellow { background-color: #fef5d1; background-image: linear-gradient(#fef5d1 95%, #f9e79f 5%); }
+    .postit-pink { background-color: #fce4ec; background-image: linear-gradient(#fce4ec 95%, #f8bbd0 5%); }
+    .postit-green { background-color: #e8f5e9; background-image: linear-gradient(#e8f5e9 95%, #c8e6c9 5%); }
+    .postit-blue { background-color: #e3f2fd; background-image: linear-gradient(#e3f2fd 95%, #bbdefb 5%); }
+
+    /* ✍️ 포스트잇 내부 입력창 스타일 */
+    .postit-textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      resize: none;
+      font-size: 1.15rem;
+      font-family: 'KyoboHandwriting', 'Noto Sans KR', sans-serif; /* 손글씨체 스타일 권장 */
+      line-height: 1.6;
+      color: #333;
+      outline: none;
+    }
+    .postit-textarea::placeholder { color: #a6acaf; font-size: 1rem; }
+
+    /* 상단 압정 핀 데코레이션 */
+    .postit::before {
+      content: "📌";
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+    }
+
+    /* 전송 버튼 */
+    .btn-submit-memo {
+      width: 100%;
+      height: 52px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    .btn-submit-memo:active { transform: scale(0.98); box-shadow: none; }
+  </style>
+</head>
+<body>
+
+<div class="memo-container">
+  <h2 style="margin-bottom: 5px;">📝 축하 메모 남기기</h2>
+  <p style="color: #888; font-size: 0.85rem; margin-bottom: 25px;">김씨에게 전하고 싶은 말을 자유롭게 남겨주세요!</p>
+
+  <form action="/submit-memo" method="POST">
+
+    <div class="postit {{ selected_color }}">
+      <textarea name="content" class="postit-textarea" placeholder="여기에 내용을 입력하세요... (화면을 터치하면 작성할 수 있어요)" required maxlength="500"></textarea>
+    </div>
+
+    <input type="hidden" name="bg_color" value="{{ selected_color }}">
+
+    <button type="submit" class="btn-submit-memo">📌 포스트잇 붙이기 (전송)</button>
+  </form>
+
+  <a href="/" class="link-back" style="margin-top: 20px; display: inline-block;">취소하고 홈으로 돌아가기</a>
+</div>
+
+</body>
+</html>
