@@ -124,14 +124,6 @@
         </div>
     </div>
 
-    {% if user.kakao_id == 4953979045 %}
-    <div style="margin: 15px 0;">
-        <a href="/admin/dashboard" class="btn-submit" style="background-color: #e67e22; text-decoration: none; display: inline-block; text-align: center; line-height: 48px; height: 48px;">
-            ⚙️ 상품 발송하기 (관리자)
-        </a>
-    </div>
-    {% endif %}
-
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -143,6 +135,11 @@
     </div>
 
     <div class="menu-grid">
+        {% if user.kakao_id == 4953979045 %}
+        <a href="/admin/dashboard" class="btn-submit" style="background-color: #e67e22; text-decoration: none; display: inline-block; text-align: center; line-height: 48px; height: 48px;">
+        ⚙️ 상품 발송하기 (관리자)
+        </a>
+        {% endif %}
         <a href="/quiz/start" class="menu-btn quiz">
             <div class="icon">🎲</div>
             <div class="label">
