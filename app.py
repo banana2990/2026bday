@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 from flask import Flask, render_template, redirect, request, session, url_for, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -76,7 +77,7 @@ class Message(db.Model):
 
 with app.app_context():
     ## TODO:: 1차 배포 후 제대로 생성된 거 확인 하고나서는 초기화 되지 않게 지우기
-    db.drop_all()
+    ## db.drop_all()
     db.create_all()
 
 # ── 라우트 ────────────────────────────────────────────────────────
