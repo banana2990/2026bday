@@ -10,15 +10,20 @@
 <body>
 
 <div class="card quiz-container">
-  <div id="quiz-progress-text" style="font-size: 0.9rem; color: #888; margin-bottom: 8px;">📋 문제 1 / 20</div>
-  <div id="question-text" class="question-box">문제를 불러오는 중입니다...</div>
-  <div class="options-group" id="options-container"></div>
   <div class="dots-container" id="dots-container"></div>
 
-  <form id="quiz-form" action="/submit-quiz" method="POST">
-    <input type="hidden" name="answers" id="answers-hidden-input">
-    <button type="submit" id="submit-quiz-btn" class="btn-submit-quiz">🎯 최종 결과 제출하기</button>
-  </form>
+  <div class="quiz-section">
+    <div id="quiz-progress-text" style="font-size: 0.9rem; color: #888; margin-bottom: 8px;">📋 문제 1 / 20</div>
+    <div id="question-text" class="question-box">문제를 불러오는 중입니다...</div>
+    <div class="options-group" id="options-container"></div>
+  </div>
+
+  <div class="submit-section">
+    <form id="quiz-form" action="/submit-quiz" method="POST">
+      <input type="hidden" name="answers" id="answers-hidden-input">
+      <button type="submit" id="submit-quiz-btn" class="btn-submit-quiz">🎯 최종 결과 제출하기</button>
+    </form>
+  </div>
 </div>
 
 <a href="/" class="link-back" style="margin-top: 30px; display: inline-block; width:100%; text-align:center;">🏠홈으로 돌아가기</a>
