@@ -2,8 +2,12 @@
 
 .records-container {
     max-width: 500px;
-    margin: 30px auto;
-    padding: 15px;
+    min-height: 400px; /* 데이터가 없어도 화면이 쪼그라들지 않게 최소 높이 확보 */
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
 }
 
 h3 {
