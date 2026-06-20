@@ -125,3 +125,39 @@ button, .form-input {
 .menu-btn .arrow { color: #ccc; font-size: 1.2rem; }
 .logout-link { font-size: 0.85rem; color: #999; text-decoration: none; }
 .logout-link:hover { text-decoration: underline; }
+
+.flash-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 90%;
+    max-width: 400px;
+}
+
+.flash-message {
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideDown 0.5s ease-out;
+}
+
+/* login_error로 보낸 메시지는 빨간색 */
+.flash-message.login_error {
+    background-color: #e74c3c;
+}
+
+/* login_success로 보낸 메시지는 초록색 */
+.flash-message.login_success {
+    background-color: #2ecc71;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
