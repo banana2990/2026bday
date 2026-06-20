@@ -42,7 +42,7 @@
   {% if attempt_count < 3 %}
   <div style="background-color: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eaeaea;">
     <p style="font-size: 0.9rem; color: #333; font-weight: bold; text-align: left; margin-bottom: 10px;">
-      1. 이 점수가 마음에 들면 이벤트 응모하기
+      이 점수로 이벤트 응모하기
     </p>
     <form action="/submit-contact" method="POST">
       <input type="text" name="contact_info" placeholder="인스타 ID 또는 핸드폰 번호" required class="form-input" style="margin-bottom: 10px;">
@@ -52,8 +52,8 @@
 
   <div style="margin-top: 20px;">
     <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;"> 점수가 아쉬운가요? (현재 도전 횟수: {{ attempt_count }} / 3회)</p>
-    <a href="/quiz/start" class="btn-home-go" style="background-color: #7f8c8d; text-decoration: none; line-height: 48px; height: 48px;">
-     2. 다시 도전하기
+    <a href="/quiz/start" class="btn-home-go" style="background-color: #7f8c8d; text-decoration: none;">
+     다시 도전하기
     </a>
   </div>
   {% else %}
