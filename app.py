@@ -262,37 +262,32 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
-# [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트 (수정본)
 # [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트
 @app.route("/quiz/start")
 def quiz_start_page():
     if "user_id" not in session:
-        flash("로그인이 필요한 서비스입니다.", "login_error")
         return redirect(url_for("home"))
 
     user = db.session.get(User, session["user_id"])
-
-    # 1) 상품 발송 유저 체크
-    if user and user.sent_at is not None:
-        return render_template("quiz_review.html", user=user) # 이미 발송된 경우 바로 리뷰 페이지로
-
-    # 2) 3회 참여 여부 및 연락처 확인
+    # 최근 기록들을 모두 가져옵니다.
     attempts = QuizAttempt.query.filter_by(user_id=user.id).order_by(QuizAttempt.total_score.desc()).all()
     attempts_count = len(attempts)
 
-    if attempts_count >= 3:
-        if not user.contact_info:
-            # 3회는 채웠지만 연락처가 없으면 응모 페이지로
-            session["last_total_score"] = attempts[0].total_score
-            session["last_correct_count"] = attempts[0].correct_count
-            return redirect(url_for("quiz_result"))
-        else:
-            # 3회 완료 + 연락처 있음 -> 정답 확인 페이지로 이동
-            # 최고점인 attempt 데이터를 가지고 리뷰 페이지로 이동
-            return render_template("quiz_review.html", best_attempt=attempts[0])
+    # 1) 상품 발송 유저 또는 3회 완료 + 연락처 있음
+    # 최고점 기록(attempts[0])이 존재하는 경우 이를 리뷰 페이지로 전달
+    if (user.sent_at is not None) or (attempts_count >= 3 and user.contact_info):
+        if not attempts: # 기록이 아예 없는 경우 방어 코드
+            return redirect(url_for("home"))
+        return render_template("quiz_review.html", best_attempt=attempts[0])
 
+    # 2) 3회 완료했지만 연락처가 없는 경우
+    if attempts_count >= 3 and not user.contact_info:
+        session["last_total_score"] = attempts[0].total_score
+        session["last_correct_count"] = attempts[0].correct_count
+        return redirect(url_for("quiz_result"))
+
+    # 3) 일반적인 퀴즈 시작
     return render_template("quiz.html")
-
 
 # [Quiz] 20문제 일괄 제출 및 채점 처리
 @app.route("/submit-quiz", methods=["POST"])

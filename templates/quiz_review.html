@@ -7,61 +7,62 @@
   <style>
     .review-container { max-width: 500px; margin: 40px auto; padding: 20px; }
     .question-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+
+    /* 기본 박스 스타일 */
     .option-box { display: block; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; }
 
-    /* 정답/오답 스타일 */
-    .olive-bg { background-color: #6B8E23 !important; color: white; border-color: #6B8E23 !important; }
-    .red-bg { background-color: #ffebee !important; color: #c62828; border-color: #ffcdd2 !important; }
-    /* 정답 박스 굵게 표시 */
-    .correct-bold {
-      border: 3px solid #6B8E23 !important; /* 더 굵은 테두리 */
-      font-weight: bold; /* 글씨 굵게 */
+    /* 정답/오답 배경 스타일 */
+    .olive-bg { background-color: #6B8E23 !important; color: white !important; border-color: #6B8E23 !important; }
+    .red-bg { background-color: #ffebee !important; color: #c62828 !important; border-color: #ffcdd2 !important; }
+
+    /* 정답 강조 스타일 (우선순위 높임) */
+    .option-box.correct-bold {
+      border: 3px solid #6B8E23 !important;
+      font-weight: bold !important;
+    }
+    </style>
+      </head>
+        <body>
+        <div class="card review-container">
+                                          <h2>📋 정답 확인</h2>
+                                                       <p>최고 점수를 받은 기록입니다.</p>
+
+                                                                            <script src="{{ url_for('static', filename='js/quiz_data.js') }}"></script>
+                                                                                                                                                <div id="review-list"></div>
+
+                                                                                                                                                                        <a href="/" class="btn-home-go" style="background-color: #333; margin-top:20px; text-decoration:none; display:block; text-align:center; padding:10px; color:white; border-radius:6px;">홈으로 돌아가기</a>
+                                                                                                                                                                                                                                                                                                                                                                         </div>
+
+                                                                                                                                                                                                                                                                                                                                                                           <script>
+    // 서버 데이터 안전하게 불러오기
+       const userAnswers = JSON.parse('{{ best_attempt.selected_answers | tojson | safe }}');
+    const container = document.getElementById('review-list');
+
+    quizData.forEach((q, i) => {
+                               const userSelected = userAnswers[i];
+                               const correctIdx = q.answer; // 정답 인덱스
+                             const item = document.createElement('div');
+                               item.className = 'question-item';
+
+                               let optionsHtml = '';
+    q.options.forEach((opt, optIdx) => {
+                                       let className = 'option-box';
+
+    // 1. 정답인 경우: 올리브색 배경 + 굵은 테두리(correct-bold) 적용
+                                                 if (optIdx === correctIdx) {
+      className += ' olive-bg correct-bold';
+    }
+    // 2. 오답인 경우: 빨간색 배경 적용 (내가 고른 답이 정답이 아닐 때만)
+    else if (optIdx === userSelected) {
+      className += ' red-bg';
     }
 
-  </style>
-</head>
-<body>
-<div class="card review-container">
-  <h2>📋 정답 확인</h2>
-  <p>최고 점수를 받은 기록입니다.</p>
-
-  <script src="{{ url_for('static', filename='js/quiz_data.js') }}"></script>
-  <div id="review-list"></div>
-
-  <a href="/" class="btn-home-go" style="background-color: #333; margin-top:20px; text-decoration:none;">홈으로 돌아가기</a>
-</div>
-
-<script>
-  const userAnswers = JSON.parse('{{ best_attempt.selected_answers | safe }}');
-  const container = document.getElementById('review-list');
-
-  quizData.forEach((q, i) => {
-    const userSelected = userAnswers[i];
-    const correctIdx = q.answer;
-    const item = document.createElement('div');
-    item.className = 'question-item';
-
-    let optionsHtml = '';
-    q.options.forEach((opt, optIdx) => {
-      let className = 'option-box';
-
-      // 1. 정답인 경우: 올리브색 배경 + 굵은 테두리/글씨 적용
-      if (optIdx === correctIdx) {
-        className += ' olive-bg correct-bold';
-      }
-
-      // 2. 내가 고른 게 틀린 경우: 빨간색 배경만 적용
-      else if (optIdx === userSelected) {
-        className += ' red-bg';
-      }
-
-      optionsHtml += `<div class="${className}">${optIdx + 1}. ${opt}</div>`;
+    optionsHtml += `<div class="${className}">${optIdx + 1}. ${opt}</div>`;
     });
 
-    // 정답/오답 문구를 삭제하고 문제와 선택지만 보여줌
     item.innerHTML = `<p><strong>${q.id}. ${q.question}</strong></p>${optionsHtml}`;
     container.appendChild(item);
-  });
-</script>
-</body>
-</html>
+    });
+    </script>
+      </body>
+        </html>
