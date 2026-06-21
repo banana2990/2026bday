@@ -7,19 +7,12 @@
   <style>
     .review-container { max-width: 500px; margin: 40px auto; padding: 20px; }
     .question-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-
-    /* 기본 박스 스타일 */
     .option-box { display: block; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; }
 
-    /* 정답/오답 배경 스타일 */
-    .olive-bg { background-color: #6B8E23 !important; color: white !important; border-color: #6B8E23 !important; }
-    .red-bg { background-color: #ffebee !important; color: #c62828 !important; border-color: #ffcdd2 !important; }
-
-    /* 정답 강조 스타일 (우선순위 높임) */
-    .option-box.correct-bold {
-      border: 3px solid #6B8E23 !important;
-      font-weight: bold !important;
-    }
+    /* 정답 스타일 (올리브색 배경 + 굵은 테두리) */
+    .olive-bg { background-color: #6B8E23 !important; color: white !important; border: 3px solid #6B8E23 !important; font-weight: bold !important; }
+    /* 오답 스타일 (옅은 빨간색 배경) */
+    .red-bg { background-color: #ffebee !important; color: #c62828 !important; border: 1px solid #ffcdd2 !important; }
     </style>
       </head>
         <body>
@@ -34,13 +27,15 @@
                                                                                                                                                                                                                                                                                                                                                                          </div>
 
                                                                                                                                                                                                                                                                                                                                                                            <script>
-    // 서버 데이터 안전하게 불러오기
-       const userAnswers = JSON.parse('{{ best_attempt.selected_answers | tojson | safe }}');
+    // 1. 서버에서 제출했던 답안 데이터
+        const userAnswers = JSON.parse('{{ best_attempt.selected_answers | tojson | safe }}');
+    // 2. 서버 app.py와 동일한 정답지 데이터 (중요!)
+    const correct_sheet = [2, 1, 0, 1, 0, 1, 2, 2, 0, 2, 1, 0, 1, 1, 2, 0, 0, 1, 2, 0];
     const container = document.getElementById('review-list');
 
     quizData.forEach((q, i) => {
                                const userSelected = userAnswers[i];
-                               const correctIdx = q.answer; // 정답 인덱스
+                               const correctIdx = correct_sheet[i]; // 정답지에서 정답 인덱스 가져오기
                              const item = document.createElement('div');
                                item.className = 'question-item';
 
@@ -48,12 +43,12 @@
     q.options.forEach((opt, optIdx) => {
                                        let className = 'option-box';
 
-    // 1. 정답인 경우: 올리브색 배경 + 굵은 테두리(correct-bold) 적용
-                                                 if (optIdx === correctIdx) {
-      className += ' olive-bg correct-bold';
+    // 정답이면 무조건 올리브색/굵게
+                     if (optIdx === correctIdx) {
+      className += ' olive-bg';
     }
-    // 2. 오답인 경우: 빨간색 배경 적용 (내가 고른 답이 정답이 아닐 때만)
-    else if (optIdx === userSelected) {
+    // 내가 고른 답이 틀렸을 경우만 빨간색
+       else if (optIdx === userSelected && userSelected !== correctIdx) {
       className += ' red-bg';
     }
 
