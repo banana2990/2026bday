@@ -18,8 +18,11 @@
 </div>
 
 <script>
-  // 서버 데이터 주입 및 스크립트 실행
-  const userAnswers = JSON.parse('{{ best_attempt.selected_answers | tojson | safe }}');
+  // 서버에서 받은 데이터를 2번 파싱하여 확실하게 배열로 변환합니다.
+  let rawData = '{{ best_attempt.selected_answers | safe }}';
+  const userAnswers = JSON.parse(JSON.parse(JSON.stringify(rawData)));
+
+  // 정답지 배열
   const correct_sheet = [2, 1, 0, 1, 0, 1, 2, 2, 0, 2, 1, 0, 1, 1, 2, 0, 0, 1, 2, 0];
 </script>
 <script src="{{ url_for('static', filename='js/quiz_review.js') }}"></script>
