@@ -16,7 +16,7 @@
 .prize-cell { font-weight: bold; color: #d35400; }
 
 /* 결과 컨테이너를 전체 너비로 확장 */
-#query-result-wrapper {
+.card, #query-result-wrapper {
     max-width: 95%; /* 화면 좌우 여백만 살짝 두고 전체 사용 */
     margin: 20px auto;
 }
