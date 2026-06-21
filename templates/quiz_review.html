@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>정답 확인하기</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
+  <style>
+    .review-container { max-width: 600px; margin: 40px auto; padding: 20px; }
+    .question-item { margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #eee; }
+    .option-checked { background: #6B8E23; color: white; padding: 5px 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<div class="card review-container">
+  <h2>📋 정답 확인</h2>
+  <p>당신의 최고 기록을 확인하세요.</p>
+
+  <script src="{{ url_for('static', filename='js/quiz_data.js') }}"></script>
+  <div id="review-list"></div>
+</div>
+
+<script>
+  const userAnswers = JSON.parse('{{ best_attempt.selected_answers | safe }}');
+  const correctSheet = [2, 1, 0, 1, 0, 1, 2, 2, 0, 2, 1, 0, 1, 1, 2, 0, 0, 1, 2, 0];
+  const container = document.getElementById('review-list');
+
+  quizData.forEach((q, i) => {
+    const isCorrect = (userAnswers[i] === correctSheet[i]);
+    const item = document.createElement('div');
+    item.className = 'question-item';
+    item.innerHTML = `
+      <p><strong>${q.id}. ${q.question}</strong></p>
+      <p>당신의 선택: <span class="${isCorrect ? 'option-checked' : ''}">${q.options[userAnswers[i]]}</span>
+         ${isCorrect ? '✅' : '❌ 정답: ' + q.options[correctSheet[i]]}</p>
+    `;
+    container.appendChild(item);
+  });
+</script>
+</body>
+</html>

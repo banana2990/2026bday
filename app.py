@@ -263,6 +263,7 @@ def logout():
     return redirect(url_for("home"))
 
 # [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트 (수정본)
+# [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트
 @app.route("/quiz/start")
 def quiz_start_page():
     if "user_id" not in session:
@@ -271,30 +272,27 @@ def quiz_start_page():
 
     user = db.session.get(User, session["user_id"])
 
-    # 1) 이미 상품이 발송된 유저인지 체크
+    # 1) 상품 발송 유저 체크
     if user and user.sent_at is not None:
-        flash("이미 상품이 발송되어 더 이상 퀴즈 참여가 불가능합니다.", "login_error")
-        return redirect(url_for("home"))
+        return render_template("quiz_review.html", user=user) # 이미 발송된 경우 바로 리뷰 페이지로
 
-    # 2) 3회 참여 제한 및 연락처 상태 체크
-    attempts_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
+    # 2) 3회 참여 여부 및 연락처 확인
+    attempts = QuizAttempt.query.filter_by(user_id=user.id).order_by(QuizAttempt.total_score.desc()).all()
+    attempts_count = len(attempts)
 
     if attempts_count >= 3:
-        # 3번을 다 했더라도 연락처가 없으면 튕기지 않고 결과 페이지(입력창)로 유도
         if not user.contact_info:
-            flash("3회 도전이 완료되었습니다. \n연락처를 입력하여 응모를 마무리해주세요.", "login_error")
-            # 마지막으로 풀었던 점수를 다시 세션에 넣어두어야 result.html에서 표시 가능
-            last_attempt = QuizAttempt.query.filter_by(user_id=user.id).order_by(QuizAttempt.id.desc()).first()
-            if last_attempt:
-                session["last_total_score"] = last_attempt.total_score
-                session["last_correct_count"] = last_attempt.correct_count
+            # 3회는 채웠지만 연락처가 없으면 응모 페이지로
+            session["last_total_score"] = attempts[0].total_score
+            session["last_correct_count"] = attempts[0].correct_count
             return redirect(url_for("quiz_result"))
         else:
-            # 연락처까지 다 넣은 경우에만 튕겨냄
-            flash("이미 모든 참여 및 응모 기회를 사용하셨습니다.", "login_error")
-            return redirect(url_for("home"))
+            # 3회 완료 + 연락처 있음 -> 정답 확인 페이지로 이동
+            # 최고점인 attempt 데이터를 가지고 리뷰 페이지로 이동
+            return render_template("quiz_review.html", best_attempt=attempts[0])
 
     return render_template("quiz.html")
+
 
 # [Quiz] 20문제 일괄 제출 및 채점 처리
 @app.route("/submit-quiz", methods=["POST"])
