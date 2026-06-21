@@ -263,7 +263,6 @@ def logout():
     return redirect(url_for("home"))
 
 # [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트 (수정본)
-# [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트 (수정본)
 @app.route("/quiz/start")
 def quiz_start_page():
     if "user_id" not in session:
@@ -283,7 +282,7 @@ def quiz_start_page():
     if attempts_count >= 3:
         # 3번을 다 했더라도 연락처가 없으면 튕기지 않고 결과 페이지(입력창)로 유도
         if not user.contact_info:
-            flash("3회 도전이 완료되었습니다. 연락처를 입력하여 응모를 마무리해주세요.", "login_error")
+            flash("3회 도전이 완료되었습니다. \n연락처를 입력하여 응모를 마무리해주세요.", "login_error")
             # 마지막으로 풀었던 점수를 다시 세션에 넣어두어야 result.html에서 표시 가능
             last_attempt = QuizAttempt.query.filter_by(user_id=user.id).order_by(QuizAttempt.id.desc()).first()
             if last_attempt:
