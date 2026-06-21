@@ -40,12 +40,14 @@
       // 1. 기본 스타일
       let className = 'option-box';
 
-      // 2. 정답인 경우: 무조건 올리브색 (정답 위치 표시)
+      // 2. [정답 표시] 정답 위치라면 무조건 올리브색 적용
       if (optIdx === correctIdx) {
         className += ' olive-bg';
       }
-      // 3. 내가 고른 게 틀린 경우: 그 선택지에만 빨간색 추가
-      else if (optIdx === userSelected) {
+
+      // 3. [오답 표시] 내가 고른 게 틀렸다면, 그 항목에만 빨간색 추가
+      // (단, 내가 고른 답이 정답이 아닐 때만 적용)
+      if (optIdx === userSelected && userSelected !== correctIdx) {
         className += ' red-bg';
       }
 
