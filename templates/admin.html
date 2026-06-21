@@ -56,9 +56,14 @@
     <h3>🔍 직접 쿼리 조회</h3>
     <textarea id="query-input" placeholder="SELECT * FROM users WHERE ..."></textarea>
     <button onclick="executeAdminQuery()" class="btn-query">쿼리 실행</button>
-    <div id="query-result" style="margin-top: 20px; overflow-x: auto;"></div>
   </div>
 
+  <div class="admin-container" id="query-result-wrapper">
+    <div id="query-result" style="overflow-x: auto; background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+    </div>
+  </div>
+
+  <!-- 사용자 메모 관리 영역 -->
   <div class="card admin-container" style="margin-top: 50px;">
     <h2>📝 전체 메모 관리</h2>
     <table class="admin-table">
