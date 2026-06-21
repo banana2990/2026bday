@@ -4,60 +4,24 @@
   <meta charset="UTF-8">
   <title>정답 확인하기</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
-  <style>
-    .review-container { max-width: 500px; margin: 40px auto; padding: 20px; }
-    .question-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-    .option-box { display: block; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; }
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_review.css') }}" />
+</head>
+<body>
+<div class="card review-container">
+  <h2>📋 정답 확인</h2>
+  <p>최고 점수를 받은 기록입니다.</p>
 
-    /* 정답 스타일 (올리브색 배경 + 굵은 테두리) */
-    .olive-bg { background-color: #6B8E23 !important; color: white !important; border: 3px solid #6B8E23 !important; font-weight: bold !important; }
-    /* 오답 스타일 (옅은 빨간색 배경) */
-    .red-bg { background-color: #ffebee !important; color: #c62828 !important; border: 1px solid #ffcdd2 !important; }
-    </style>
-      </head>
-        <body>
-        <div class="card review-container">
-                                          <h2>📋 정답 확인</h2>
-                                                       <p>최고 점수를 받은 기록입니다.</p>
+  <script src="{{ url_for('static', filename='js/quiz_data.js') }}"></script>
+  <div id="review-list"></div>
 
-                                                                            <script src="{{ url_for('static', filename='js/quiz_data.js') }}"></script>
-                                                                                                                                                <div id="review-list"></div>
+  <a href="/" class="btn-home-go">홈으로 돌아가기</a>
+</div>
 
-                                                                                                                                                                        <a href="/" class="btn-home-go" style="background-color: #333; margin-top:20px; text-decoration:none; display:block; text-align:center; padding:10px; color:white; border-radius:6px;">홈으로 돌아가기</a>
-                                                                                                                                                                                                                                                                                                                                                                         </div>
-
-                                                                                                                                                                                                                                                                                                                                                                           <script>
-    // 1. 서버에서 제출했던 답안 데이터
-        const userAnswers = JSON.parse('{{ best_attempt.selected_answers | tojson | safe }}');
-    // 2. 서버 app.py와 동일한 정답지 데이터 (중요!)
-    const correct_sheet = [2, 1, 0, 1, 0, 1, 2, 2, 0, 2, 1, 0, 1, 1, 2, 0, 0, 1, 2, 0];
-    const container = document.getElementById('review-list');
-
-    quizData.forEach((q, i) => {
-                               const userSelected = userAnswers[i];
-                               const correctIdx = correct_sheet[i]; // 정답지에서 정답 인덱스 가져오기
-                             const item = document.createElement('div');
-                               item.className = 'question-item';
-
-                               let optionsHtml = '';
-    q.options.forEach((opt, optIdx) => {
-                                       let className = 'option-box';
-
-    // 정답이면 무조건 올리브색/굵게
-                     if (optIdx === correctIdx) {
-      className += ' olive-bg';
-    }
-    // 내가 고른 답이 틀렸을 경우만 빨간색
-       else if (optIdx === userSelected && userSelected !== correctIdx) {
-      className += ' red-bg';
-    }
-
-    optionsHtml += `<div class="${className}">${optIdx + 1}. ${opt}</div>`;
-    });
-
-    item.innerHTML = `<p><strong>${q.id}. ${q.question}</strong></p>${optionsHtml}`;
-    container.appendChild(item);
-    });
-    </script>
-      </body>
-        </html>
+<script>
+  // 서버 데이터 주입 및 스크립트 실행
+  const userAnswers = JSON.parse('{{ best_attempt.selected_answers | tojson | safe }}');
+  const correct_sheet = [2, 1, 0, 1, 0, 1, 2, 2, 0, 2, 1, 0, 1, 1, 2, 0, 0, 1, 2, 0];
+</script>
+<script src="{{ url_for('static', filename='js/quiz_review.js') }}"></script>
+</body>
+</html>

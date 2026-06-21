@@ -1,0 +1,12 @@
+.review-container { max-width: 500px; margin: 40px auto; padding: 20px; }
+.question-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+.option-box { display: block; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; }
+
+/* 정답/오답 스타일 */
+.olive-bg { background-color: #6B8E23 !important; color: white !important; border: 3px solid #6B8E23 !important; font-weight: bold !important; }
+.red-bg { background-color: #ffebee !important; color: #c62828 !important; border: 1px solid #ffcdd2 !important; }
+
+.btn-home-go {
+    background-color: #333; margin-top:20px; text-decoration:none;
+    display:block; text-align:center; padding:10px; color:white; border-radius:6px;
+}
