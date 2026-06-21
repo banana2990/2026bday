@@ -26,31 +26,42 @@
 </div>
 
 <script>
-  // 서버에서 넘겨준 선택 답변 데이터를 가져옴
   const userAnswers = JSON.parse('{{ best_attempt.selected_answers | safe }}');
-  // 정답지 (quiz_data.js에 정의된 정답과 동일한 인덱스 배열)
-  const correctSheet = quizData.map(q => q.answer);
   const container = document.getElementById('review-list');
 
   quizData.forEach((q, i) => {
     const userSelected = userAnswers[i];
+    const correctIdx = q.answer; // 정답 인덱스
     const item = document.createElement('div');
     item.className = 'question-item';
 
     let optionsHtml = '';
     q.options.forEach((opt, optIdx) => {
+      // 1. 기본 스타일
       let className = 'option-box';
-      // 사용자가 고른 답이 정답인 경우 (올리브색)
-      if (optIdx === correctSheet[i]) className += ' olive-bg';
-      // 사용자가 고른 답이 틀린 경우 (옅은 빨간색)
-      else if (optIdx === userSelected && userSelected !== correctSheet[i]) className += ' red-bg';
+
+      // 2. 정답인 경우: 무조건 올리브색 (정답 위치 표시)
+      if (optIdx === correctIdx) {
+        className += ' olive-bg';
+      }
+      // 3. 내가 고른 게 틀린 경우: 그 선택지에만 빨간색 추가
+      else if (optIdx === userSelected) {
+        className += ' red-bg';
+      }
 
       optionsHtml += `<div class="${className}">${optIdx + 1}. ${opt}</div>`;
     });
 
-    item.innerHTML = `<p><strong>${q.id}. ${q.question}</strong></p>${optionsHtml}`;
+    // 결과 메시지
+    const isCorrect = (userSelected === correctIdx);
+    const resultMsg = isCorrect
+            ? `<p style="color: #6B8E23; font-weight: bold; margin-top:10px;">✅ 정답입니다!</p>`
+            : `<p style="color: #c62828; font-weight: bold; margin-top:10px;">❌ 오답입니다.</p>`;
+
+    item.innerHTML = `<p><strong>${q.id}. ${q.question}</strong></p>${optionsHtml}${resultMsg}`;
     container.appendChild(item);
   });
 </script>
+
 </body>
 </html>
