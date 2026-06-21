@@ -5,21 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>관리자 대시보드 - 상품 발송 관리</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
   <script src="{{ url_for('static', filename='js/prize_manager.js') }}"></script>
-  <style>
-    .admin-container { max-width: 950px; margin: 40px auto; padding: 20px; }
-    .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85rem; }
-    .admin-table th, .admin-table td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-    .admin-table th { background-color: #f8f9fa; font-weight: bold; }
-    .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-    .status-n { background-color: #ffebee; color: #c62828; }
-    .status-y { background-color: #e8f5e9; color: #2e7d32; }
-    .btn-action { padding: 5px 10px; background-color: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
-    .btn-action:disabled { background-color: #ccc; cursor: not-allowed; }
-    .btn-cancel { background-color: #dc3545; margin-left: 5px; }
-       /* 기존 스타일 유지하면서 추가 */
-    .admin-table td { word-break: break-all; } /* 긴 내용이 셀을 뚫고 나가지 않게 */
-  </style>
 </head>
 <body>
 
@@ -46,9 +33,7 @@
       <td><strong>{{ person.nickname }}</strong></td>
       <td>{{ person.contact_info }}</td>
       <td>{{ person.best_score }}점</td>
-
-      <td class="prize-cell" data-score="{{ person.best_score }}" style="font-weight:bold; color:#d35400;">계산중...</td>
-
+      <td class="prize-cell" data-score="{{ person.best_score }}">계산중...</td>
       <td>
         <span class="status-badge {{ 'status-y' if person.sent_at else 'status-n' }}" id="badge-{{ person.id }}">
           {{ 'Y' if person.sent_at else 'N' }}
@@ -66,15 +51,19 @@
     </tbody>
   </table>
 
+  <!-- 쿼리 입력 영역 -->
+  <div class="card" style="margin-top: 30px;">
+    <h3>🔍 직접 쿼리 조회</h3>
+    <textarea id="query-input" placeholder="SELECT * FROM users WHERE ..."></textarea>
+    <button onclick="executeAdminQuery()" class="btn-query">쿼리 실행</button>
+    <div id="query-result" style="margin-top: 20px; overflow-x: auto;"></div>
+  </div>
+
   <div class="card admin-container" style="margin-top: 50px;">
     <h2>📝 전체 메모 관리</h2>
     <table class="admin-table">
       <thead>
-      <tr>
-        <th>작성자(닉네임)</th>
-        <th>내용</th>
-        <th>작성시간</th>
-      </tr>
+      <tr><th>작성자(닉네임)</th><th>내용</th><th>작성시간</th></tr>
       </thead>
       <tbody>
       {% for memo in all_memos %}
@@ -84,40 +73,13 @@
         <td>{{ memo.created_at.strftime('%m-%d %H:%M') }}</td>
       </tr>
       {% else %}
-      <tr>
-        <td colspan="3" style="padding: 20px; color: #999;">작성된 메모가 없습니다.</td>
-      </tr>
+      <tr><td colspan="3" style="padding: 20px; color: #999;">작성된 메모가 없습니다.</td></tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
-
 </div>
 
-<script>
-  // 1. 페이지 로드 시 상품명 자동 매핑
-  document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll('.prize-cell').forEach(cell => {
-      const score = cell.getAttribute('data-score');
-      cell.innerText = PrizeManager.getPrizeName(score);
-    });
-  });
-
-  // 2. 발송 처리
-  function processSend(userId) {
-    if(!confirm("상품을 발송 처리하시겠습니까?")) return;
-    fetch(`/admin/send-product/${userId}`, { method: 'POST' })
-            .then(res => res.json())
-            .then(data => { if(data.success) location.reload(); else alert(data.message); });
-  }
-
-  // 3. 발송 취소 처리
-  function cancelSend(userId) {
-    if(!confirm("발송을 취소하시겠습니까?")) return;
-    fetch(`/admin/cancel-product/${userId}`, { method: 'POST' })
-            .then(res => res.json())
-            .then(data => { if(data.success) location.reload(); else alert(data.message); });
-  }
-</script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
 </html>

@@ -470,6 +470,27 @@ def cancel_product(target_user_id):
 
     return jsonify({"success": True, "message": "발송이 취소되었습니다."})
 
+@app.route("/admin/query", methods=["POST"])
+def admin_query():
+    # 1. 관리자 권한 확인 (본인의 카카오 ID)
+    current_user = db.session.get(User, session.get("user_id"))
+    if not current_user or current_user.kakao_id != 4953979045:
+        return jsonify({"error": "권한 없음"}), 403
+
+    query = request.json.get("query", "").strip()
+
+    # 2. SELECT문만 허용하여 데이터 보호
+    if not query.upper().startswith("SELECT"):
+        return jsonify({"error": "SELECT 쿼리만 가능합니다."}), 400
+
+    try:
+        result = db.session.execute(db.text(query))
+        columns = result.keys()
+        data = [dict(zip(columns, row)) for row in result.fetchall()]
+        return jsonify({"columns": list(columns), "data": data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # [Memo] 사용자가 메모 작성 페이지에 들어올 때 (앞문 단속)
 @app.route("/memo")
 def memo_page():
