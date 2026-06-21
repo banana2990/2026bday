@@ -263,6 +263,7 @@ def logout():
     return redirect(url_for("home"))
 
 # [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트 (수정본)
+# [Quiz] 퀴즈 시작 전 진입 게이트웨이 라우트 (수정본)
 @app.route("/quiz/start")
 def quiz_start_page():
     if "user_id" not in session:
@@ -276,11 +277,23 @@ def quiz_start_page():
         flash("이미 상품이 발송되어 더 이상 퀴즈 참여가 불가능합니다.", "login_error")
         return redirect(url_for("home"))
 
-    # 2) 3회 참여 제한 체크
+    # 2) 3회 참여 제한 및 연락처 상태 체크
     attempts_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
+
     if attempts_count >= 3:
-        flash("이미 3회의 참여 기회를 모두 사용하셨습니다. (최대 3회)", "login_error")
-        return redirect(url_for("home"))
+        # 3번을 다 했더라도 연락처가 없으면 튕기지 않고 결과 페이지(입력창)로 유도
+        if not user.contact_info:
+            flash("3회 도전이 완료되었습니다. 연락처를 입력하여 응모를 마무리해주세요.", "login_error")
+            # 마지막으로 풀었던 점수를 다시 세션에 넣어두어야 result.html에서 표시 가능
+            last_attempt = QuizAttempt.query.filter_by(user_id=user.id).order_by(QuizAttempt.id.desc()).first()
+            if last_attempt:
+                session["last_total_score"] = last_attempt.total_score
+                session["last_correct_count"] = last_attempt.correct_count
+            return redirect(url_for("quiz_result"))
+        else:
+            # 연락처까지 다 넣은 경우에만 튕겨냄
+            flash("이미 모든 참여 및 응모 기회를 사용하셨습니다.", "login_error")
+            return redirect(url_for("home"))
 
     return render_template("quiz.html")
 
