@@ -11,12 +11,12 @@ document.addEventListener("DOMContentLoaded", function() {
         q.options.forEach((opt, optIdx) => {
             let className = 'option-box';
 
-            // 정답 강조
+            // 1. [정답]은 무조건 올리브색 + 굵게
             if (optIdx === correctIdx) {
                 className += ' olive-bg';
             }
-            // 오답 체크 (내가 고른 게 틀렸을 때만 빨간색)
-            else if (optIdx === userSelected && userSelected !== correctIdx) {
+            // 2. [오답] 내가 선택한 것인데 정답이 아닌 경우만 빨간색
+            else if (optIdx === userSelected) {
                 className += ' red-bg';
             }
 
