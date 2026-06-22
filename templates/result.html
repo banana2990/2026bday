@@ -58,9 +58,11 @@
     </a>
   </div>
   {% else %}
-  <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #856404; font-size: 0.85rem; border: 1px solid #ffeeba; text-align: left;">
+  <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #856404; font-size: 0.85rem; border: 1px solid #ffeeba; text-align: center;">
     <strong> 모든 도전 기회를 사용하셨습니다!</strong><br>
-    이제 아래 창에 최종 정보를 기입하셔야 완료됩니다. <br> (3번 중 최고 점수로 제출됩니다.)
+    아래 창에 상품이 전송될 연락처를 기입해주세요. <br>
+    3번 중 최고 점수로 제출되며, <br>
+    이후 퀴즈 페이지 접속시, 정답 확인이 가능합니다.
   </div>
 
   <form action="/submit-contact" method="POST">
@@ -68,9 +70,7 @@
     <button type="submit" class="btn-home-go" style="background-color: #4a90e2;"> 🎯 이벤트 참여 완료하기</button>
   </form>
   {% endif %}
+  <a href="/" class="btn-home-go">홈으로 돌아가기</a>
 </div>
-
-<a href="/" class="btn-home-go">홈으로 돌아가기</a>
-
 </body>
 </html>
