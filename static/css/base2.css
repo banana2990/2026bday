@@ -188,3 +188,8 @@ button {
     background-color: #333; margin-top:20px; text-decoration:none;
     display:block; text-align:center; padding:10px; color:white; border-radius:6px;
 }
+
+.thumbnail {
+    width: 65px;
+    height: 65px;
+}
