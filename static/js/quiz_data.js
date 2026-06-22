@@ -1,8 +1,8 @@
 const quizData = [
     {
         id: 1,
-        question: "다음 중 김씨의 취미가 아닌 것은?",
-        options: ["영화 보기", "전시 보기", "러닝"]
+        question: "다음 중 김씨의 전공은?",
+        options: ["영어학", "영어영문학", "영문학"]
     },
     {
         id: 2,
@@ -31,8 +31,8 @@ const quizData = [
     },
     {
         id: 7,
-        question: "다음 중 김씨의 전공은?",
-        options: ["영어학", "영어영문학", "영문학"]
+        question: "다음 중 김씨의 취미가 아닌 것은?",
+        options: ["영화 보기", "전시 보기", "러닝"]
     },
     {
         id: 8,

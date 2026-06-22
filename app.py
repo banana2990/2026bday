@@ -340,6 +340,8 @@ def quiz_result():
     if "user_id" not in session:
         return redirect(url_for("home"))
 
+    user = db.session.get(User, session["user_id"])
+
     score = session.get("last_total_score", 0)
     count = session.get("last_correct_count", 0)
     attempt_count = QuizAttempt.query.filter_by(user_id=session["user_id"]).count()
@@ -349,7 +351,8 @@ def quiz_result():
         "result.html",
         score=score,
         count=count,
-        attempt_count=attempt_count
+        attempt_count=attempt_count,
+        user=user
     )
 
 

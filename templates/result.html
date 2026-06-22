@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>퀴즈 결과 발표!</title>
+  <link rel="shortcut icon" href="/static/img/favicon.ico">
+  <link rel="apple-touch-icon-precomposed" href="/static/img/favicon.ico" />
+  <title>2026 김예진 퀴즈</title>
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
   <style>
     .result-container { max-width: 480px; margin: 60px auto; padding: 30px 20px; text-align: center; }
@@ -43,7 +46,7 @@
       이 점수로 이벤트 응모하기
     </p>
     <form action="/submit-contact" method="POST">
-      <input type="text" name="contact_info" placeholder="인스타 ID 또는 핸드폰 번호" required class="form-input" style="margin-bottom: 10px;">
+      <input type="text" name="contact_info" placeholder="인스타 ID 또는 핸드폰 번호" required class="form-input" style="margin-bottom: 10px;" value="{{ user.contact_info if user.contact_info else '' }}">
       <button type="submit" class="btn-home-go" style="background-color: #2e7d32;"> 제출하고 홈으로 가기</button>
     </form>
   </div>
@@ -57,12 +60,12 @@
   {% else %}
   <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #856404; font-size: 0.85rem; border: 1px solid #ffeeba; text-align: left;">
     <strong> 모든 도전 기회를 사용하셨습니다!</strong><br>
-    이제 아래 창에 최종 정보를 기입하셔야 완료됩니다. (3번 중 최고 점수로 제출됩니다.)
+    이제 아래 창에 최종 정보를 기입하셔야 완료됩니다. <br> (3번 중 최고 점수로 제출됩니다.)
   </div>
 
   <form action="/submit-contact" method="POST">
-    <input type="text" name="contact_info" placeholder="인스타 ID 또는 핸드폰 번호" required class="form-input">
-    <button type="submit" class="btn-home-go" style="background-color: #4a90e2;">🎯 이벤트 참여 완료하기</button>
+    <input type="text" name="contact_info" placeholder="인스타 ID 또는 핸드폰 번호" required class="form-input" value="{{ user.contact_info if user.contact_info else '' }}">
+    <button type="submit" class="btn-home-go" style="background-color: #4a90e2;"> 🎯 이벤트 참여 완료하기</button>
   </form>
   {% endif %}
 </div>
