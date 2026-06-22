@@ -1,15 +1,55 @@
+/* 기존 레이아웃 스타일 보존 및 반응형 수정 */
 .review-container {
+    /* 좁게 고정하던 min-width 제거 */
     max-width: 500px;
-    min-width: 450px;
+    width: 95%;      /* 모바일에서 화면 꽉 차게 */
+    margin: 20px auto;
     padding: 20px;
     background: #ffffff;
     border-radius: 8px;
     border: 1px solid #ddd;
-    margin-top: 20px;
+    box-sizing: border-box; /* 패딩 포함하여 너비 계산 */
 }
-.question-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-.option-box { display: block; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; }
 
-/* 정답/오답 스타일 */
-.olive-bg { background-color: #6B8E23 !important; color: white !important; border: 3px solid #6B8E23 !important; font-weight: bold !important; }
-.red-bg { background-color: #ffebee !important; color: #c62828 !important; border: 1px solid #ffcdd2 !important; }
+.question-item {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    word-break: break-all; /* 모바일에서 긴 글자 줄바꿈 */
+}
+
+.option-box {
+    display: block;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+/* 정답/오답 스타일 (유지) */
+.olive-bg {
+    background-color: #6B8E23 !important;
+    color: white !important;
+    border: 3px solid #6B8E23 !important;
+    font-weight: bold !important;
+}
+.red-bg {
+    background-color: #ffebee !important;
+    color: #c62828 !important;
+    border: 1px solid #ffcdd2 !important;
+}
+
+/* 추가: 모바일에서 버튼 최적화 */
+.btn-home-go {
+    background-color: #333;
+    display: block;
+    width: 100%;
+    padding: 15px;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-sizing: border-box;
+}
