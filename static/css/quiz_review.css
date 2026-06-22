@@ -1,5 +1,6 @@
 .review-container {
     max-width: 500px;
+    min-width: 450px;
     padding: 20px;
     background: #ffffff;
     border-radius: 8px;
