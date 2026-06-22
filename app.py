@@ -544,28 +544,34 @@ def my_records():
     current_user_id = session["user_id"]
     current_user = db.session.get(User, current_user_id)
 
+    # 1. ID 순서대로 가져오기 (회차 순서 보존)
     attempts = QuizAttempt.query.filter_by(user_id=current_user_id).order_by(QuizAttempt.id.asc()).all()
 
-    # 최고 점수 구하기
-    max_score = max([att.total_score for att in attempts]) if attempts else 0
+    # 2. 최고 점수와 해당 점수를 가진 가장 큰 ID(최신 기록)를 찾음
+    if attempts:
+        max_score = max([att.total_score for att in attempts])
+        # 최고 점수이면서 ID가 가장 큰(최신) 것의 ID를 찾음
+        best_attempt_id = max([att.id for att in attempts if att.total_score == max_score])
+    else:
+        max_score = 0
+        best_attempt_id = None
 
     quiz_results = []
     for idx, att in enumerate(attempts):
-        # 현재 기록이 최고 점수와 같은지 확인 (첫 번째 최고점 기록만 처리하려면 추가 로직 필요)
-        is_best = (att.total_score == max_score)
+        # 해당 기록의 ID가 위에서 찾은 best_attempt_id와 일치하면 True
+        is_best = (att.id == best_attempt_id)
 
         quiz_results.append({
             "round": idx + 1,
             "correct_count": att.correct_count,
             "score": att.total_score,
             "is_sent": "Y" if current_user.sent_at else "N",
-            "is_best": is_best # 최고점 여부 전달
+            "is_best": is_best
         })
 
     my_memos = UserMemo.query.filter_by(user_id=current_user_id).order_by(UserMemo.created_at.desc()).all()
 
     return render_template("my_records.html", quiz_results=quiz_results, my_memos=my_memos)
-
 
 # [API] 메모 수정 처리
 @app.route("/api/memo/update/<int:memo_id>", methods=["POST"])
