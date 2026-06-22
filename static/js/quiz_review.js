@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", function() {
     const container = document.getElementById('review-list');
 
-    // 데이터 확인용 (개발자 도구 콘솔에서 확인 가능)
+/*    // 데이터 확인용 (개발자 도구 콘솔에서 확인 가능)
     console.log("사용자 답안:", userAnswers);
     console.log("정답지:", correct_sheet);
+ */
 
     quizData.forEach((q, i) => {
         // userAnswers가 배열인지 확인하고 인덱스 접근
