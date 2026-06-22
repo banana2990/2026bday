@@ -64,7 +64,7 @@
         <h2 class="section-title">회원가입</h2>
         <form action="/register" method="POST" id="register-form"> <div style="display: flex; gap: 8px; margin-bottom: 10px;">
             <input type="text" name="username" id="reg-username" placeholder="새 아이디" required class="form-input" style="margin-bottom: 0; flex-grow: 1;">
-            <button type="button" onclick="checkDuplicateUsername()" style="width: 90px; height: 48px; background-color: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">중복 확인</button>
+            <button type="button" onclick="checkDuplicateUsername()" style="width: 90px; height: 48px; background-color: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">중복<br/>확인</button>
         </div>
             <div id="username-check-msg" style="text-align: left; font-size: 0.8rem; margin-top: -5px; margin-bottom: 10px; display: none;"></div>
 
@@ -75,7 +75,7 @@
         </form>
 
         <div class="auth-links">
-            <a href="#" onclick="showSection('auth-login')">이미 계정이 있으신가요? 로그인</a>
+            <a href="#" onclick="showSection('auth-login')">이미 계정이 있으신가요? > 로그인</a>
             <span class="lnb-divider">|</span>
             <a href="#" onclick="showSection('auth-start')" class="link-back">뒤로가기</a>
         </div>
