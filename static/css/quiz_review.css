@@ -1,4 +1,12 @@
-.review-container { max-width: 500px; margin: 40px auto; padding: 20px; }
+.review-container {
+    max-width: 500px;
+    min-height: 400px; /* 데이터가 없어도 화면이 쪼그라들지 않게 최소 높이 확보 */
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+}
 .question-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
 .option-box { display: block; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; }
 
