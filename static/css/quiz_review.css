@@ -1,6 +1,5 @@
 .review-container {
-    width: 100%;
-    min-height: 400px; /* 데이터가 없어도 화면이 쪼그라들지 않게 최소 높이 확보 */
+    max-width: 500px;
     padding: 20px;
     background: #ffffff;
     border-radius: 8px;
