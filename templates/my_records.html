@@ -15,9 +15,9 @@
 <body>
 
 <div class="records-container">
-  <h2>📋 내 기록 확인</h2>
+  <h2>내 기록 확인</h2>
 
-  <h3> &lt;퀴즈 참여 결과&gt; </h3>
+  <h3> [퀴즈 참여 결과] </h3>
   <table class="record-table">
     <thead>
     <tr>
@@ -40,8 +40,12 @@
       <td>
         {% if res.is_sent == 'Y' %}
         <span class="status-y">완료</span>
-        {% else %}
+        {% elif res.is_best %}
+        <!-- 최고점일 때만 '예정' 표시 -->
         <span class="status-n">예정</span>
+        {% else %}
+        <!-- 최고점이 아니면 아무것도 표시 안 함 -->
+        -
         {% endif %}
       </td>
     </tr>
@@ -53,7 +57,7 @@
     </tbody>
   </table>
 
-  <h3>&lt;내가 남긴 메시지&gt;</h3>
+  <h3>[내가 남긴 메시지]</h3>
   <div class="memo-list">
     {% for memo in my_memos %}
     <div class="postit-card {{ memo.bg_color }}" id="memo-box-{{ memo.id }}">

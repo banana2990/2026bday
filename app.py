@@ -546,14 +546,20 @@ def my_records():
 
     attempts = QuizAttempt.query.filter_by(user_id=current_user_id).order_by(QuizAttempt.id.asc()).all()
 
-    # 🛠️ prize 할당 로직을 제거하고, 순수 점수 데이터셋만 보냅니다.
+    # 최고 점수 구하기
+    max_score = max([att.total_score for att in attempts]) if attempts else 0
+
     quiz_results = []
     for idx, att in enumerate(attempts):
+        # 현재 기록이 최고 점수와 같은지 확인 (첫 번째 최고점 기록만 처리하려면 추가 로직 필요)
+        is_best = (att.total_score == max_score)
+
         quiz_results.append({
             "round": idx + 1,
             "correct_count": att.correct_count,
             "score": att.total_score,
-            "is_sent": "Y" if current_user.sent_at else "N"
+            "is_sent": "Y" if current_user.sent_at else "N",
+            "is_best": is_best # 최고점 여부 전달
         })
 
     my_memos = UserMemo.query.filter_by(user_id=current_user_id).order_by(UserMemo.created_at.desc()).all()
