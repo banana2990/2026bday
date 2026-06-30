@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="/static/img/favicon.ico">
+  <link rel="apple-touch-icon-precomposed" href="/static/img/favicon.ico" />
+
   <title>관리자모드</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base2.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
-  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/prize_manager.js') }}"></script>
 </head>
 <body>
 
@@ -32,28 +34,61 @@
     {% for person in contestants %}
     <tr id="row-{{ person.id }}">
       <td><strong>{{ person.nickname }}</strong></td>
-      <td>{{ person.phone_number }}</td>
-      <td class="prize-cell" data-score="{{ person.highest_score }}">{{ person.highest_score }}</td>
-      <td class="prize-cell" data-score="{{ person.highest_score }}"></td>
+      <td>{{ person.contact_info }}</td>
+      <td>{{ person.best_score }}점</td>
+      <td class="prize-cell" data-score="{{ person.best_score }}">계산중...</td>
       <td>
-        <span id="status-{{ person.id }}" class="status-badge {{ 'status-y' if person.is_sent else 'status-n' }}">
-            {{ '발송완료' if person.is_sent else '미발송' }}
+        <span class="status-badge {{ 'status-y' if person.sent_at else 'status-n' }}" id="badge-{{ person.id }}">
+          {{ 'Y' if person.sent_at else 'N' }}
         </span>
       </td>
       <td>
-        <button id="btn-send-{{ person.id }}" class="btn-action"
-                style="{{ 'display:none;' if person.is_sent else 'display:inline-block;' }}"
-                onclick="processSend('{{ person.id }}')">발송</button>
-
-        <button id="btn-cancel-{{ person.id }}" class="btn-action btn-cancel"
-                style="{{ 'display:inline-block;' if person.is_sent else 'display:none;' }}"
-                onclick="processCancel('{{ person.id }}')">취소</button>
+        <button type="button" class="btn-action" onclick="processSend('{{ person.id }}')"
+                {% if person.sent_at %} disabled {% endif %} id="btn-{{ person.id }}">발송</button>
+        {% if person.sent_at %}
+        <button type="button" class="btn-action btn-cancel" onclick="cancelSend('{{ person.id }}')">취소</button>
+        {% endif %}
       </td>
     </tr>
     {% endfor %}
     </tbody>
   </table>
 
+  <!-- 쿼리 입력 영역 -->
+  <div class="card" style="margin-top: 10px;">
+    <h3>🔍 쿼리 조회</h3>
+    <textarea id="query-input" placeholder="SELECT * FROM users WHERE ..."></textarea>
+    <button onclick="executeAdminQuery()" style="width:20%" class="btn-query">쿼리 실행</button>
+  </div>
+
+  <div class="admin-container" id="query-result-wrapper">
+    <div id="query-result" style="overflow-x: auto; background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+    </div>
+  </div>
+
+  <!-- 사용자 메모 관리 영정 -->
+  <div class="card admin-container" style="margin-top: 50px;">
+    <h2>📝 전체 메모 관리</h2>
+    <table class="admin-table">
+      <thead>
+      <tr><th>작성자(닉네임)</th><th>내용</th><th>작성시간</th></tr>
+      </thead>
+      <tbody>
+      {% for memo in all_memos %}
+      <tr>
+        <td><strong>{{ memo.user.nickname }}</strong></td>
+        <td style="text-align: left; padding: 10px;">{{ memo.content }}</td>
+        <td>{{ memo.created_at.strftime('%m-%d %H:%M') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" style="padding: 20px; color: #999;">작성된 메모가 없습니다.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+<p class="footer">© 김씨 퀴즈 2026</p>
+<p class="footer">모든 정보는 7월 1일 파기됩니다. 서비스가 7월 1일까지 무료거든요.</p>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
 </html>

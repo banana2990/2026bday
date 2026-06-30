@@ -31,14 +31,6 @@ async function executeAdminQuery() {
     document.getElementById('query-result').innerHTML = html;
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll('.prize-cell').forEach(cell => {
-        const score = cell.getAttribute('data-score');
-        if(score) cell.innerText = PrizeManager.getPrizeName(score);
-    });
-});
-
-// 발송 처리
 function processSend(userId) {
     if(!confirm("상품을 발송 처리하시겠습니까?")) return;
     fetch(`/admin/send-product/${userId}`, { method: 'POST' })
@@ -54,8 +46,7 @@ function processSend(userId) {
         });
 }
 
-// 취소 처리
-function processCancel(userId) {
+function cancelSend(userId) {
     if(!confirm("발송을 취소하시겠습니까?")) return;
     fetch(`/admin/cancel-product/${userId}`, { method: 'POST' })
         .then(res => res.json())
