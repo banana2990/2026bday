@@ -31,16 +31,35 @@ async function executeAdminQuery() {
     document.getElementById('query-result').innerHTML = html;
 }
 
-function processSend(userId) {
+function sendPrize(personId) {
+    // 서버 요청 로직...
     if(!confirm("상품을 발송 처리하시겠습니까?")) return;
     fetch(`/admin/send-product/${userId}`, { method: 'POST' })
         .then(res => res.json())
-        .then(data => { if(data.success) location.reload(); else alert(data.message); });
+        .then(data => {
+            if(data.success) {
+                // 버튼 교체: 발송 숨기고 취소 보이기
+                document.getElementById(`btn-send-${personId}`).style.display = 'none';
+                document.getElementById(`btn-cancel-${personId}`).style.display = 'inline-block';
+                // 상태 배지 업데이트 (선택 사항)
+                document.getElementById(`status-${personId}`).className = 'status-badge status-y';
+                document.getElementById(`status-${personId}`).innerText = '발송완료';
+            }
+        });
 }
 
-function cancelSend(userId) {
-    if(!confirm("발송을 취소하시겠습니까?")) return;
-    fetch(`/admin/cancel-product/${userId}`, { method: 'POST' })
+function cancelPrize(personId) {
+    // 서버 요청 로직...
+    fetch(`/admin/cancel/${personId}`, { method: 'POST' })
         .then(res => res.json())
-        .then(data => { if(data.success) location.reload(); else alert(data.message); });
+        .then(data => {
+            if(data.success) {
+                // 버튼 교체: 취소 숨기고 발송 보이기
+                document.getElementById(`btn-cancel-${personId}`).style.display = 'none';
+                document.getElementById(`btn-send-${personId}`).style.display = 'inline-block';
+                // 상태 배지 업데이트
+                document.getElementById(`status-${personId}`).className = 'status-badge status-n';
+                document.getElementById(`status-${personId}`).innerText = '미발송';
+            }
+        });
 }

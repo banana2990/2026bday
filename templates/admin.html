@@ -42,11 +42,13 @@
           {{ 'Y' if person.sent_at else 'N' }}
         </span>
       </td>
-      <td>
-        <button type="button" class="btn-action" onclick="processSend('{{ person.id }}')"
-                {% if person.sent_at %} disabled {% endif %} id="btn-{{ person.id }}">발송</button>
-        {% if person.sent_at %}
-        <button type="button" class="btn-action btn-cancel" onclick="cancelSend('{{ person.id }}')">취소</button>
+      <td id="action-cell-{{ person.id }}">
+        {% if not person.is_sent %}
+        <button id="btn-send-{{ person.id }}" class="btn-action" onclick="sendPrize('{{ person.id }}')">발송</button>
+        <button id="btn-cancel-{{ person.id }}" class="btn-action btn-cancel" style="display:none;" onclick="cancelPrize('{{ person.id }}')">취소</button>
+        {% else %}
+        <button id="btn-send-{{ person.id }}" class="btn-action" style="display:none;" onclick="sendPrize('{{ person.id }}')">발송</button>
+        <button id="btn-cancel-{{ person.id }}" class="btn-action btn-cancel" onclick="cancelPrize('{{ person.id }}')">취소</button>
         {% endif %}
       </td>
     </tr>
