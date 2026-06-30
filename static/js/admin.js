@@ -34,7 +34,7 @@ async function executeAdminQuery() {
 function sendPrize(personId) {
     // 서버 요청 로직...
     if(!confirm("상품을 발송 처리하시겠습니까?")) return;
-    fetch(`/admin/send-product/${userId}`, { method: 'POST' })
+    fetch(`/admin/send-product/${personId}`, { method: 'POST' })
         .then(res => res.json())
         .then(data => {
             if(data.success) {
