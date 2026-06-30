@@ -60,3 +60,4 @@ function cancelSend(userId) {
             } else { alert(data.message); }
         });
 }
+
